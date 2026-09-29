@@ -15,6 +15,10 @@ import {
 } from "@/components/admin/RequestStatusForm";
 
 import {
+  QuotePanel,
+} from "@/components/admin/QuotePanel";
+
+import {
   notFound,
   redirect,
 } from "next/navigation";
@@ -70,6 +74,10 @@ type Customer = {
 type Product = {
   id: number;
   name: string;
+
+  deposit:
+    | number
+    | string;
 };
 
 
@@ -177,6 +185,49 @@ type Reservation = {
 
   created_at:
     string;
+
+  quoted_total:
+    | number
+    | string
+    | null;
+
+  quote_notes:
+    | string
+    | null;
+
+  quote_sent_at:
+    | string
+    | null;
+
+  quote_updated_at:
+    | string
+    | null;
+
+  quote_deposit:
+    | number
+    | string
+    | null;
+
+  quote_payment_method:
+    | string
+    | null;
+
+  quote_payment_details:
+    | string
+    | null;
+
+  quote_valid_until:
+    | string
+    | null;
+
+  quote_logistics:
+    | string
+    | null;
+
+  quote_revision:
+    | number
+    | string
+    | null;
 
   customers:
     | Customer
@@ -491,6 +542,16 @@ export default async function AdminRequestPage({
           status,
           notes,
           created_at,
+          quoted_total,
+          quote_notes,
+          quote_sent_at,
+          quote_updated_at,
+          quote_deposit,
+          quote_payment_method,
+          quote_payment_details,
+          quote_valid_until,
+          quote_logistics,
+          quote_revision,
 
           customers (
             name,
@@ -506,7 +567,8 @@ export default async function AdminRequestPage({
 
             products (
               id,
-              name
+              name,
+              deposit
             ),
 
             unit_assignments (
@@ -1161,6 +1223,65 @@ export default async function AdminRequestPage({
       "confirmed";
 
 
+  const quotedTotal =
+    reservation.quoted_total ===
+      null
+      ? null
+      : Number(
+          reservation.quoted_total
+        );
+
+
+  const quoteDeposit =
+    reservation.quote_deposit ===
+      null
+      ? null
+      : Number(
+          reservation.quote_deposit
+        );
+
+
+  const suggestedDeposit =
+    items.reduce(
+      (
+        sum,
+        item
+      ) => {
+        const product =
+          first(
+            item.products
+          );
+
+        return (
+          sum +
+          Number(
+            product?.deposit ??
+              0
+          ) *
+            item.quantity
+        );
+      },
+      0
+    );
+
+
+  const quoteRevision =
+    Number(
+      reservation.quote_revision ??
+        0
+    ) || 0;
+
+
+  const canEditQuote =
+    canOperate &&
+    (
+      reservation.status ===
+        "requested" ||
+      reservation.status ===
+        "confirmed"
+    );
+
+
   const allAssigned =
     totalQuantity >
       0 &&
@@ -1520,6 +1641,64 @@ export default async function AdminRequestPage({
               </article>
 
             </section>
+
+
+            {/* =================================================
+                QUOTE
+                ================================================= */}
+
+            <QuotePanel
+              requestId={
+                reservation.id
+              }
+              reference={
+                reservation.reference
+              }
+              customerName={
+                customer?.name ??
+                "Cliente"
+              }
+              customerEmail={
+                customer?.email ??
+                ""
+              }
+              estimateTotal={
+                total
+              }
+              suggestedDeposit={
+                suggestedDeposit
+              }
+              quotedTotal={
+                quotedTotal
+              }
+              quoteDeposit={
+                quoteDeposit
+              }
+              quotePaymentMethod={
+                reservation.quote_payment_method
+              }
+              quotePaymentDetails={
+                reservation.quote_payment_details
+              }
+              quoteValidUntil={
+                reservation.quote_valid_until
+              }
+              quoteLogistics={
+                reservation.quote_logistics
+              }
+              quoteNotes={
+                reservation.quote_notes
+              }
+              quoteSentAt={
+                reservation.quote_sent_at
+              }
+              quoteRevision={
+                quoteRevision
+              }
+              canEdit={
+                canEditQuote
+              }
+            />
 
 
             {/* =================================================

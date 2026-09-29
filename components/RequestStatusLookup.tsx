@@ -41,6 +41,37 @@ type RequestResult = {
   total:
     number;
 
+  quote:
+    | {
+        total:
+          number;
+
+        deposit:
+          number;
+
+        paymentMethod:
+          string | null;
+
+        paymentDetails:
+          string | null;
+
+        validUntil:
+          string | null;
+
+        logistics:
+          string | null;
+
+        notes:
+          string | null;
+
+        sentAt:
+          string;
+
+        revision:
+          number;
+      }
+    | null;
+
   items:
     {
       name:
@@ -143,6 +174,36 @@ function formatDate(
   ).format(
     new Date(
       `${value}T00:00:00`
+    )
+  );
+}
+
+
+function formatDateTime(
+  value: string
+) {
+
+  return new Intl.DateTimeFormat(
+    "it-IT",
+    {
+      day:
+        "2-digit",
+
+      month:
+        "2-digit",
+
+      year:
+        "numeric",
+
+      hour:
+        "2-digit",
+
+      minute:
+        "2-digit",
+    }
+  ).format(
+    new Date(
+      value
     )
   );
 }
@@ -596,6 +657,158 @@ export function RequestStatusLookup({
           )}
 
 
+          {result.quote && (
+            <section className="overflow-hidden rounded-[26px] border border-[#ff5a1f]/20 bg-white">
+
+              <div className="grid lg:grid-cols-[1fr_330px]">
+
+                <div className="p-6 sm:p-8">
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
+                      Preventivo LAP GEAR
+                    </div>
+
+                    <div className="rounded-full bg-[#fff0e9] px-3 py-1.5 text-[10px] font-bold text-[#e94b12]">
+                      Rev. {String(
+                        Math.max(
+                          1,
+                          result.quote.revision
+                        )
+                      ).padStart(
+                        2,
+                        "0"
+                      )}
+                    </div>
+                  </div>
+
+                  <h2 className="mt-2 text-[30px] font-semibold tracking-[-0.045em]">
+                    Il preventivo che abbiamo preparato per te.
+                  </h2>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[18px] bg-[#181818] p-5 text-white">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-[#ff7b4a]">
+                        Totale noleggio
+                      </div>
+
+                      <div className="mt-2 text-[34px] font-semibold tracking-[-0.05em]">
+                        {formatMoney(
+                          result.quote.total
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-[18px] bg-[#fff0e9] p-5">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-[#e94b12]">
+                        Cauzione
+                      </div>
+
+                      <div className="mt-2 text-[30px] font-semibold tracking-[-0.05em]">
+                        {formatMoney(
+                          result.quote.deposit
+                        )}
+                      </div>
+
+                      <div className="mt-1 text-[11px] leading-5 text-black/35">
+                        Gestita separatamente dal totale noleggio.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[16px] bg-[#f3f2ed] px-5 py-4">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
+                        Pagamento
+                      </div>
+
+                      <div className="mt-2 text-[14px] font-semibold text-black/65">
+                        {result.quote.paymentMethod ||
+                          "Da concordare"}
+                      </div>
+
+                      {result.quote.paymentDetails && (
+                        <div className="mt-2 whitespace-pre-wrap text-[12px] leading-5 text-black/40">
+                          {result.quote.paymentDetails}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-[16px] bg-[#f3f2ed] px-5 py-4">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
+                        Validità
+                      </div>
+
+                      <div className="mt-2 text-[14px] font-semibold text-black/65">
+                        {result.quote.validUntil
+                          ? `Fino al ${formatDate(
+                              result.quote.validUntil
+                            )}`
+                          : "Da concordare"}
+                      </div>
+
+                      {result.quote.logistics && (
+                        <div className="mt-3 border-t border-black/10 pt-3 text-[12px] leading-5 text-black/40">
+                          {result.quote.logistics}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {result.quote.notes && (
+                    <div className="mt-5 rounded-[16px] bg-[#fff4ef] px-5 py-4">
+
+                      <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-[#a93e18]">
+                        Note al preventivo
+                      </div>
+
+                      <p className="mt-2 whitespace-pre-wrap text-[14px] leading-6 text-[#5c3c30]">
+                        {result.quote.notes}
+                      </p>
+
+                    </div>
+                  )}
+
+                </div>
+
+                <div className="bg-[#181818] p-6 text-white sm:p-8">
+
+                  <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff7b4a]">
+                    Preventivo inviato
+                  </div>
+
+                  <div className="mt-2 text-[18px] font-semibold">
+                    {formatDateTime(
+                      result.quote.sentAt
+                    )}
+                  </div>
+
+                  <div className="mt-6 border-t border-white/10 pt-5">
+
+                    <div className="text-[11px] text-white/35">
+                      Stima iniziale
+                    </div>
+
+                    <div className="mt-1 text-[20px] font-semibold text-white/70">
+                      {formatMoney(
+                        result.total
+                      )}
+                    </div>
+
+                  </div>
+
+                  <p className="mt-6 text-[12px] leading-5 text-white/40">
+                    Il PDF completo è stato inviato via email e contiene materiale, cauzione, pagamento e condizioni operative. Il preventivo non equivale ancora alla conferma del noleggio.
+                  </p>
+
+                </div>
+
+              </div>
+
+            </section>
+          )}
+
+
           <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
 
             <div className="overflow-hidden rounded-[26px] border border-black/10 bg-white">
@@ -683,14 +896,26 @@ export function RequestStatusLookup({
               <div className="mt-5 border-t border-white/10 pt-5">
 
                 <div className="text-[12px] text-white/35">
-                  Stima noleggio
+                  {result.quote
+                    ? "Preventivo"
+                    : "Stima noleggio"}
                 </div>
 
                 <div className="mt-1 text-[29px] font-semibold tracking-[-0.04em]">
                   {formatMoney(
-                    result.total
+                    result.quote
+                      ? result.quote.total
+                      : result.total
                   )}
                 </div>
+
+                {result.quote && (
+                  <div className="mt-2 text-[11px] text-white/30">
+                    Stima iniziale {formatMoney(
+                      result.total
+                    )}
+                  </div>
+                )}
 
               </div>
 

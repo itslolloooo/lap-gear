@@ -158,6 +158,15 @@ export async function POST(
           end_date,
           status,
           created_at,
+          quoted_total,
+          quote_deposit,
+          quote_payment_method,
+          quote_payment_details,
+          quote_valid_until,
+          quote_logistics,
+          quote_notes,
+          quote_sent_at,
+          quote_revision,
 
           customers!inner (
             name,
@@ -260,6 +269,45 @@ export async function POST(
 
       created_at:
         string;
+
+      quoted_total:
+        | number
+        | string
+        | null;
+
+      quote_deposit:
+        | number
+        | string
+        | null;
+
+      quote_payment_method:
+        | string
+        | null;
+
+      quote_payment_details:
+        | string
+        | null;
+
+      quote_valid_until:
+        | string
+        | null;
+
+      quote_logistics:
+        | string
+        | null;
+
+      quote_notes:
+        | string
+        | null;
+
+      quote_sent_at:
+        | string
+        | null;
+
+      quote_revision:
+        | number
+        | string
+        | null;
 
       customers:
         | {
@@ -453,6 +501,48 @@ export async function POST(
         days,
 
         total,
+
+        quote:
+          reservation.quote_sent_at &&
+          reservation.quoted_total !==
+            null
+            ? {
+                total:
+                  Number(
+                    reservation.quoted_total
+                  ),
+
+                deposit:
+                  Number(
+                    reservation.quote_deposit ??
+                      0
+                  ),
+
+                paymentMethod:
+                  reservation.quote_payment_method,
+
+                paymentDetails:
+                  reservation.quote_payment_details,
+
+                validUntil:
+                  reservation.quote_valid_until,
+
+                logistics:
+                  reservation.quote_logistics,
+
+                notes:
+                  reservation.quote_notes,
+
+                sentAt:
+                  reservation.quote_sent_at,
+
+                revision:
+                  Number(
+                    reservation.quote_revision ??
+                      0
+                  ),
+              }
+            : null,
 
         items,
       },
