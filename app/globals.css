@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /*
+     * ================================
+     * LAP GEAR — CORE PALETTE
+     * ================================
+     */
+
+    --background: #ebeae4;
+    --surface: #ffffff;
+    --surface-soft: #deddd5;
+    --surface-warm: #f4eee8;
+
+    --text: #101010;
+    --text-muted: #595953;
+    --text-soft: #777770;
+
+    --border: rgba(16, 16, 16, 0.12);
+    --border-strong: rgba(16, 16, 16, 0.22);
+
+    --graphite: #151515;
+
+    --accent: #ff5a1f;
+    --accent-hover: #e94b12;
+    --accent-soft: #fff0e9;
+
+    --blue: #245bff;
+    --blue-soft: #edf2ff;
+
+    --success: #0a9655;
+    --success-soft: #e7f7ee;
+
+    --warning: #d98a08;
+    --warning-soft: #fff2d5;
+
+    --danger: #cf3d32;
+    --danger-soft: #fff0ee;
+
+    /*
+     * ================================
+     * CATEGORY ACCENTS
+     * ================================
+     */
+
+    --cat-camera: #315df4;
+    --cat-camera-soft: #edf1ff;
+
+    --cat-lens: #7757d8;
+    --cat-lens-soft: #f1edff;
+
+    --cat-audio: #078b70;
+    --cat-audio-soft: #e7f7f2;
+
+    --cat-light: #d79200;
+    --cat-light-soft: #fff3d1;
+
+    --cat-video: #f05a24;
+    --cat-video-soft: #fff0e9;
+
+    --cat-live: #007ca8;
+    --cat-live-soft: #e7f6fb;
+
+    --cat-accessory: #585858;
+    --cat-accessory-soft: #eeeeeb;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+
+    background: var(--background);
+    color: var(--text);
+
+    font-family:
+      Arial,
+      Helvetica,
+      sans-serif;
+
+    font-size: 16px;
+    line-height: 1.5;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  textarea,
+  select {
+    color: var(--text);
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #ffffff;
+  }
+}
+
+
+/* ==========================================
+   SCROLLBAR
+   ========================================== */
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #dfded7;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #a6a59d;
+    border: 2px solid #dfded7;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #777770;
+  }
+}
+
+
+/* ==========================================
+   FOCUS
+   ========================================== */
+
+:focus-visible {
+  outline: 3px solid rgba(255, 90, 31, 0.35);
+  outline-offset: 3px;
+}
+
+
+/* ==========================================
+   REDUCED MOTION
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
