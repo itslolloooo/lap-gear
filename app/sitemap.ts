@@ -37,71 +37,72 @@ export default async function sitemap():
       {
         url:
           `${siteUrl}/`,
-
         lastModified:
           now,
-
         changeFrequency:
           "weekly",
-
         priority:
           1,
       },
-
       {
         url:
           `${siteUrl}/catalogo`,
-
         lastModified:
           now,
-
         changeFrequency:
           "daily",
-
         priority:
           0.9,
       },
-
       {
         url:
           `${siteUrl}/noleggio`,
-
         lastModified:
           now,
-
         changeFrequency:
           "weekly",
-
         priority:
           0.8,
       },
-
       {
         url:
           `${siteUrl}/termini-noleggio`,
-
         lastModified:
           now,
-
         changeFrequency:
           "monthly",
-
         priority:
           0.3,
       },
-
       {
         url:
           `${siteUrl}/privacy`,
-
         lastModified:
           now,
-
         changeFrequency:
           "monthly",
-
         priority:
           0.3,
+      },
+      {
+        url:
+          `${siteUrl}/note-legali`,
+        lastModified:
+          now,
+        changeFrequency:
+          "monthly",
+        priority:
+          0.2,
+      },
+      {
+        url:
+          `${siteUrl}/recesso`,
+        lastModified:
+          now,
+        changeFrequency:
+          "monthly",
+        priority:
+          0.2,
       },
     ];
 
@@ -172,13 +173,10 @@ export default async function sitemap():
               `${siteUrl}/prodotto/${encodeURIComponent(
                 product.slug
               )}`,
-
             lastModified:
               now,
-
             changeFrequency:
               "weekly",
-
             priority:
               0.7,
           })

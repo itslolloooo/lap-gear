@@ -4,6 +4,8 @@ import "./globals.css";
 import { RentalProvider } from "@/components/RentalProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { LegalFooter } from "@/components/LegalFooter";
+
 
 export const metadata: Metadata = {
   title: "LAP equipment · Noleggio attrezzatura foto video live",

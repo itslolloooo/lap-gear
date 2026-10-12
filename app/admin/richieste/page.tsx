@@ -17,10 +17,6 @@ export const dynamic =
   "force-dynamic";
 
 
-/* =========================================================
-   TYPES
-   ========================================================= */
-
 type ReservationStatus =
   | "requested"
   | "confirmed"
@@ -33,10 +29,7 @@ type Customer = {
   id: number;
   name: string;
   email: string;
-
-  phone:
-    | string
-    | null;
+  phone: string | null;
 };
 
 
@@ -49,10 +42,7 @@ type ReservationProduct = {
 
 type ReservationItem = {
   id: number;
-
-  quantity:
-    number;
-
+  quantity: number;
   price_day:
     | number
     | string;
@@ -66,25 +56,30 @@ type ReservationItem = {
 
 type Reservation = {
   id: string;
+  reference: string;
+  start_date: string;
+  end_date: string;
+  status: ReservationStatus;
+  notes: string | null;
+  created_at: string;
 
-  reference:
-    string;
-
-  start_date:
-    string;
-
-  end_date:
-    string;
-
-  status:
-    ReservationStatus;
-
-  notes:
+  quoted_total:
+    | number
     | string
     | null;
 
-  created_at:
-    string;
+  quote_sent_at:
+    | string
+    | null;
+
+  quote_revision:
+    | number
+    | null;
+
+  quote_deposit:
+    | number
+    | string
+    | null;
 
   customers:
     | Customer
@@ -99,61 +94,33 @@ type Reservation = {
 
 type SearchParams = {
   q?: string;
+  vista?: string;
   stato?: string;
 };
 
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
+type ViewKey =
+  | "tutte"
+  | "da-gestire"
+  | "preventivi"
+  | "confermate"
+  | "in-corso"
+  | "chiuse";
 
-function getCustomer(
+
+function first<T>(
   value:
-    | Customer
-    | Customer[]
+    | T
+    | T[]
     | null
 ) {
   if (!value) {
     return null;
   }
 
-  if (
-    Array.isArray(
-      value
-    )
-  ) {
-    return (
-      value[0] ??
-      null
-    );
-  }
-
-  return value;
-}
-
-
-function getProduct(
-  value:
-    | ReservationProduct
-    | ReservationProduct[]
-    | null
-) {
-  if (!value) {
-    return null;
-  }
-
-  if (
-    Array.isArray(
-      value
-    )
-  ) {
-    return (
-      value[0] ??
-      null
-    );
-  }
-
-  return value;
+  return Array.isArray(value)
+    ? value[0] ?? null
+    : value;
 }
 
 
@@ -171,7 +138,8 @@ function rentalDays(
       `${to}T00:00:00`
     );
 
-  return (
+  return Math.max(
+    1,
     Math.floor(
       (
         end.getTime() -
@@ -191,12 +159,10 @@ function formatDate(
     {
       day:
         "2-digit",
-
       month:
         "2-digit",
-
       year:
-        "numeric",
+        "2-digit",
     }
   ).format(
     new Date(
@@ -214,16 +180,10 @@ function formatCreatedAt(
     {
       day:
         "2-digit",
-
       month:
         "2-digit",
-
-      year:
-        "numeric",
-
       hour:
         "2-digit",
-
       minute:
         "2-digit",
     }
@@ -243,13 +203,10 @@ function formatMoney(
     {
       style:
         "currency",
-
       currency:
         "EUR",
-
       minimumFractionDigits:
         2,
-
       maximumFractionDigits:
         2,
     }
@@ -263,21 +220,15 @@ function statusLabel(
   status:
     ReservationStatus
 ) {
-  switch (
-    status
-  ) {
+  switch (status) {
     case "requested":
       return "Da gestire";
-
     case "confirmed":
       return "Confermata";
-
     case "picked_up":
       return "Ritirata";
-
     case "returned":
       return "Restituita";
-
     case "cancelled":
       return "Annullata";
   }
@@ -288,40 +239,144 @@ function statusClasses(
   status:
     ReservationStatus
 ) {
-  switch (
-    status
-  ) {
+  switch (status) {
     case "requested":
-      return "bg-[#fff2d5] text-[#aa6b08]";
-
+      return "bg-[#fff2d5] text-[#9a6208]";
     case "confirmed":
       return "bg-[#edf2ff] text-[#245bff]";
-
     case "picked_up":
       return "bg-[#e9f6ee] text-[#168a50]";
-
     case "returned":
-      return "bg-[#eeeeea] text-black/45";
-
+      return "bg-[#eeeeea] text-black/50";
     case "cancelled":
-      return "bg-[#fff0ee] text-[#c33d32]";
+      return "bg-[#fff0ee] text-[#b7352b]";
   }
 }
 
 
-/* =========================================================
-   PAGE
-   ========================================================= */
+function estimatedTotal(
+  reservation:
+    Reservation
+) {
+  const days =
+    rentalDays(
+      reservation.start_date,
+      reservation.end_date
+    );
+
+  return (
+    reservation.reservation_items ??
+    []
+  ).reduce(
+    (
+      sum,
+      item
+    ) =>
+      sum +
+      Number(
+        item.price_day
+      ) *
+        item.quantity *
+        days,
+    0
+  );
+}
+
+
+function viewMatches(
+  reservation:
+    Reservation,
+  view:
+    ViewKey
+) {
+  switch (view) {
+    case "da-gestire":
+      return (
+        reservation.status ===
+          "requested" &&
+        !reservation.quote_sent_at
+      );
+
+    case "preventivi":
+      return (
+        reservation.status ===
+          "requested" &&
+        Boolean(
+          reservation.quote_sent_at
+        )
+      );
+
+    case "confermate":
+      return (
+        reservation.status ===
+        "confirmed"
+      );
+
+    case "in-corso":
+      return (
+        reservation.status ===
+        "picked_up"
+      );
+
+    case "chiuse":
+      return (
+        reservation.status ===
+          "returned" ||
+        reservation.status ===
+          "cancelled"
+      );
+
+    case "tutte":
+    default:
+      return true;
+  }
+}
+
+
+function viewHref(
+  view:
+    ViewKey
+) {
+  return view ===
+    "tutte"
+    ? "/admin/richieste"
+    : `/admin/richieste?vista=${encodeURIComponent(
+        view
+      )}`;
+}
+
+
+function getProductNames(
+  reservation:
+    Reservation
+) {
+  return (
+    reservation.reservation_items ??
+    []
+  )
+    .map(
+      (
+        item
+      ) =>
+        first(
+          item.products
+        )?.name
+    )
+    .filter(
+      (
+        name
+      ): name is string =>
+        Boolean(name)
+    );
+}
+
 
 export default async function AdminRequestsPage({
   searchParams,
 }: {
-  searchParams?: Promise<SearchParams>;
+  searchParams?:
+    Promise<SearchParams>;
 }) {
-
-  /* =======================================================
-     AUTH
-     ======================================================= */
 
   const access =
     await requireAdminAccess([
@@ -343,10 +398,6 @@ export default async function AdminRequestsPage({
       "operator";
 
 
-  /* =======================================================
-     SUPABASE
-     ======================================================= */
-
   const supabase =
     getServerSupabase();
 
@@ -356,10 +407,6 @@ export default async function AdminRequestsPage({
     );
   }
 
-
-  /* =======================================================
-     REQUESTS
-     ======================================================= */
 
   const {
     data,
@@ -378,6 +425,10 @@ export default async function AdminRequestsPage({
           status,
           notes,
           created_at,
+          quoted_total,
+          quote_sent_at,
+          quote_revision,
+          quote_deposit,
 
           customers (
             id,
@@ -423,93 +474,122 @@ export default async function AdminRequestsPage({
       Reservation[];
 
 
-  /* =======================================================
-     PARAMS
-     ======================================================= */
-
   const params =
     searchParams
       ? await searchParams
       : {};
 
   const query =
-    (
+    String(
       params.q ??
       ""
     )
       .trim()
       .toLowerCase();
 
-  const filterStatus =
-    params.stato ??
-    "tutte";
+  const allowedViews:
+    ViewKey[] = [
+      "tutte",
+      "da-gestire",
+      "preventivi",
+      "confermate",
+      "in-corso",
+      "chiuse",
+    ];
+
+  const requestedView =
+    String(
+      params.vista ??
+      "tutte"
+    ) as ViewKey;
+
+  const view:
+    ViewKey =
+    allowedViews.includes(
+      requestedView
+    )
+      ? requestedView
+      : "tutte";
+
+  const legacyStatus =
+    String(
+      params.stato ??
+      ""
+    ).trim();
 
 
-  /* =======================================================
-     COUNTS
-     ======================================================= */
+  const counts = {
+    all:
+      reservations.length,
 
-  const requested =
-    reservations.filter(
-      (reservation) =>
-        reservation.status ===
-        "requested"
-    ).length;
+    todo:
+      reservations.filter(
+        (
+          reservation
+        ) =>
+          viewMatches(
+            reservation,
+            "da-gestire"
+          )
+      ).length,
 
-  const confirmed =
-    reservations.filter(
-      (reservation) =>
-        reservation.status ===
-        "confirmed"
-    ).length;
+    quotes:
+      reservations.filter(
+        (
+          reservation
+        ) =>
+          viewMatches(
+            reservation,
+            "preventivi"
+          )
+      ).length,
 
-  const pickedUp =
-    reservations.filter(
-      (reservation) =>
-        reservation.status ===
-        "picked_up"
-    ).length;
+    confirmed:
+      reservations.filter(
+        (
+          reservation
+        ) =>
+          reservation.status ===
+          "confirmed"
+      ).length,
 
-  const returned =
-    reservations.filter(
-      (reservation) =>
-        reservation.status ===
-        "returned"
-    ).length;
+    active:
+      reservations.filter(
+        (
+          reservation
+        ) =>
+          reservation.status ===
+          "picked_up"
+      ).length,
+
+    closed:
+      reservations.filter(
+        (
+          reservation
+        ) =>
+          reservation.status ===
+            "returned" ||
+          reservation.status ===
+            "cancelled"
+      ).length,
+  };
 
 
-  /* =======================================================
-     FILTER
-     ======================================================= */
-
-  const filteredReservations =
+  const filtered =
     reservations.filter(
       (
         reservation
       ) => {
+
         const customer =
-          getCustomer(
+          first(
             reservation.customers
           );
 
         const products =
-          (
-            reservation.reservation_items ??
-            []
-          )
-            .map(
-              (
-                item
-              ) =>
-                getProduct(
-                  item.products
-                )?.name
-            )
-            .filter(
-              Boolean
-            )
-            .join(" ");
-
+          getProductNames(
+            reservation
+          );
 
         const searchable =
           [
@@ -517,8 +597,8 @@ export default async function AdminRequestsPage({
             customer?.name,
             customer?.email,
             customer?.phone,
-            products,
             reservation.notes,
+            ...products,
           ]
             .filter(
               Boolean
@@ -526,225 +606,254 @@ export default async function AdminRequestsPage({
             .join(" ")
             .toLowerCase();
 
-
         const queryOk =
           !query ||
           searchable.includes(
             query
           );
 
+        const viewOk =
+          viewMatches(
+            reservation,
+            view
+          );
 
-        const statusOk =
-          filterStatus ===
+        const legacyStatusOk =
+          !legacyStatus ||
+          legacyStatus ===
             "tutte" ||
           reservation.status ===
-            filterStatus;
-
+            legacyStatus;
 
         return (
           queryOk &&
-          statusOk
+          viewOk &&
+          legacyStatusOk
         );
       }
     );
 
 
+  const viewCards:
+    {
+      key: ViewKey;
+      label: string;
+      count: number;
+      hint: string;
+    }[] = [
+      {
+        key:
+          "da-gestire",
+        label:
+          "Da gestire",
+        count:
+          counts.todo,
+        hint:
+          "Richieste senza preventivo",
+      },
+      {
+        key:
+          "preventivi",
+        label:
+          "Preventivi",
+        count:
+          counts.quotes,
+        hint:
+          "Inviati, in attesa",
+      },
+      {
+        key:
+          "confermate",
+        label:
+          "Confermate",
+        count:
+          counts.confirmed,
+        hint:
+          "Da preparare",
+      },
+      {
+        key:
+          "in-corso",
+        label:
+          "In corso",
+        count:
+          counts.active,
+        hint:
+          "Materiale fuori",
+      },
+      {
+        key:
+          "chiuse",
+        label:
+          "Chiuse",
+        count:
+          counts.closed,
+        hint:
+          "Restituite o annullate",
+      },
+    ];
+
+
   return (
-    <main className="min-h-screen bg-[#ebeae4] px-5 pb-16 pt-6 text-[#111111] sm:px-8 lg:px-10 lg:pb-20 xl:px-14">
+    <main className="min-h-screen bg-[#ebeae4] px-4 pb-14 pt-5 text-[#111111] sm:px-6 lg:px-8 xl:px-10">
 
       <div className="mx-auto max-w-[1680px]">
 
-        {/* =================================================
-            HERO
-            ================================================= */}
+        <section className="rounded-[26px] border border-black/10 bg-white px-5 py-5 shadow-[0_14px_40px_rgba(0,0,0,0.045)] sm:px-7">
 
-        <section className="overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_18px_60px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-          <div className="grid xl:grid-cols-[1fr_430px]">
+            <div className="min-w-0">
 
-            {/* LEFT */}
+              <div className="flex flex-wrap items-center gap-3">
 
-            <div className="relative overflow-hidden p-8 sm:p-10 lg:p-12">
+                <Link
+                  href="/admin"
+                  className="text-[13px] font-semibold text-black/40 transition hover:text-[#ff5a1f]"
+                >
+                  ← Dashboard
+                </Link>
 
-              <div className="pointer-events-none absolute -right-36 -top-40 h-[420px] w-[420px] rounded-full bg-[#ff5a1f]/[0.07]" />
+                <span className="h-1 w-1 rounded-full bg-black/20" />
 
-
-              <div className="relative">
-
-                <div className="inline-flex items-center gap-2.5 rounded-full bg-[#fff0e9] px-4 py-2 text-[13px] font-bold uppercase tracking-[0.12em] text-[#e94b12]">
-
-                  <span className="h-2 w-2 rounded-full bg-[#ff5a1f]" />
-
-                  LAP GEAR / Admin
-                </div>
-
-
-                <h1 className="mt-7 text-[53px] font-semibold leading-[0.9] tracking-[-0.062em] sm:text-[68px] lg:text-[78px]">
-
-                  Gestisci
-                  <br />
-
-                  <span className="text-[#ff5a1f]">
-                    le richieste.
-                  </span>
-                </h1>
-
-
-                <p className="mt-7 max-w-[720px] text-[18px] leading-8 text-black/55">
-                  Dalla nuova richiesta
-                  fino alla riconsegna:
-                  materiale, cliente,
-                  assegnazioni e stato del
-                  noleggio.
-                </p>
-
-
-                <div className="mt-8">
-
-                  <Link
-                    href="/admin"
-                    className="inline-flex h-[58px] items-center justify-center rounded-[16px] border border-black/10 bg-[#f1f0ea] px-6 text-[15px] font-semibold text-black/60 transition hover:border-black/25 hover:bg-white hover:text-black"
-                  >
-                    ← Dashboard
-                  </Link>
-
+                <div className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#ff5a1f]">
+                  Rental control
                 </div>
 
               </div>
+
+
+              <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
+
+                <h1 className="text-[40px] font-semibold leading-none tracking-[-0.055em] sm:text-[50px]">
+                  Richieste.
+                </h1>
+
+                <div className="pb-1 text-[14px] font-medium text-black/35">
+                  {counts.all} totali
+                </div>
+
+              </div>
+
+
+              <p className="mt-3 max-w-[680px] text-[15px] leading-6 text-black/45">
+                Una vista compatta per capire
+                subito cosa richiede attenzione:
+                preventivo, conferma, preparazione,
+                consegna e rientro.
+              </p>
+
             </div>
 
 
-            {/* RIGHT */}
+            <div className="shrink-0">
 
-            <div className="relative overflow-hidden bg-[#181818] p-8 text-white sm:p-10">
+              <div className="rounded-[18px] bg-[#181818] px-5 py-4 text-white">
 
-              <div className="pointer-events-none absolute -right-24 -top-24 h-[260px] w-[260px] rounded-full bg-[#ff5a1f]/20" />
-
-
-              <div className="relative">
-
-                <div className="text-[12px] font-bold uppercase tracking-[0.13em] text-[#ff7b4a]">
-                  Rental Control
+                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/35">
+                  Da fare ora
                 </div>
 
-                <div className="mt-3 text-[31px] font-semibold leading-tight tracking-[-0.045em]">
-                  Pipeline
-                  <br />
-                  noleggi.
+                <div className="mt-1 text-[30px] font-semibold leading-none tracking-[-0.045em] text-[#ff7b4a]">
+                  {counts.todo}
                 </div>
 
-
-                <div className="mt-8 grid grid-cols-2 gap-3">
-
-                  <HeroStat
-                    value={
-                      reservations.length
-                    }
-                    label="Totali"
-                  />
-
-                  <HeroStat
-                    value={
-                      requested
-                    }
-                    label="Da gestire"
-                    warning={
-                      requested >
-                      0
-                    }
-                  />
-
-                  <HeroStat
-                    value={
-                      confirmed
-                    }
-                    label="Confermate"
-                  />
-
-                  <HeroStat
-                    value={
-                      pickedUp
-                    }
-                    label="Fuori"
-                    success={
-                      pickedUp >
-                      0
-                    }
-                  />
-
+                <div className="mt-1 text-[12px] text-white/45">
+                  richieste da preventivare
                 </div>
 
               </div>
+
             </div>
 
           </div>
-        </section>
-
-
-        {/* =================================================
-            PIPELINE
-            ================================================= */}
-
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
-          <PipelineCard
-            number="01"
-            label="Da gestire"
-            value={
-              requested
-            }
-            description="Nuove richieste da verificare"
-            tone="warning"
-          />
-
-          <PipelineCard
-            number="02"
-            label="Confermate"
-            value={
-              confirmed
-            }
-            description="Noleggi approvati"
-            tone="blue"
-          />
-
-          <PipelineCard
-            number="03"
-            label="Ritirate"
-            value={
-              pickedUp
-            }
-            description="Materiale attualmente fuori"
-            tone="success"
-          />
-
-          <PipelineCard
-            number="04"
-            label="Restituite"
-            value={
-              returned
-            }
-            description="Noleggi completati"
-          />
 
         </section>
 
 
-        {/* =================================================
-            FILTER
-            ================================================= */}
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
 
-        <section className="mt-6 overflow-hidden rounded-[24px] border border-black/10 bg-white">
+          {viewCards.map(
+            (
+              card
+            ) => {
+              const active =
+                view ===
+                card.key;
+
+              return (
+                <Link
+                  key={
+                    card.key
+                  }
+                  href={
+                    viewHref(
+                      card.key
+                    )
+                  }
+                  className={`rounded-[20px] border p-4 transition ${
+                    active
+                      ? "border-[#ff5a1f]/35 bg-[#fff0e9] shadow-[0_10px_30px_rgba(255,90,31,0.08)]"
+                      : "border-black/10 bg-white hover:border-black/20 hover:bg-[#fbfaf7]"
+                  }`}
+                >
+
+                  <div className="flex items-center justify-between gap-4">
+
+                    <div className="text-[13px] font-semibold text-black/55">
+                      {
+                        card.label
+                      }
+                    </div>
+
+                    <div
+                      className={`flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-[13px] font-bold ${
+                        active
+                          ? "bg-[#ff5a1f] text-white"
+                          : "bg-[#f1f0ea] text-black/55"
+                      }`}
+                    >
+                      {
+                        card.count
+                      }
+                    </div>
+
+                  </div>
+
+                  <div className="mt-2 text-[11px] leading-5 text-black/35">
+                    {
+                      card.hint
+                    }
+                  </div>
+
+                </Link>
+              );
+            }
+          )}
+
+        </section>
+
+
+        <section className="mt-5 rounded-[22px] border border-black/10 bg-white p-4 sm:p-5">
 
           <form
             method="get"
-            className="grid gap-3 p-5 lg:grid-cols-[1fr_240px_auto]"
+            className="flex flex-col gap-3 md:flex-row md:items-center"
           >
 
-            <div className="relative">
+            {view !==
+              "tutte" && (
+              <input
+                type="hidden"
+                name="vista"
+                value={
+                  view
+                }
+              />
+            )}
 
-              <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-[18px] text-black/30">
-                ⌕
-              </span>
+
+            <div className="relative min-w-0 flex-1">
 
               <input
                 type="search"
@@ -753,622 +862,394 @@ export default async function AdminRequestsPage({
                   params.q ??
                   ""
                 }
-                placeholder="Cerca cliente, riferimento, email, prodotto..."
-                className="h-[58px] w-full rounded-[16px] border border-black/10 bg-[#f5f4ef] pl-13 pr-4 text-[15px] outline-none transition placeholder:text-black/30 focus:border-[#ff5a1f]/45 focus:bg-white focus:shadow-[0_0_0_4px_rgba(255,90,31,0.06)]"
+                placeholder="Cerca riferimento, cliente, email, telefono o attrezzatura…"
+                className="h-[50px] w-full rounded-[15px] border border-black/10 bg-[#f6f5f0] px-4 pr-12 text-[14px] outline-none transition placeholder:text-black/30 focus:border-[#ff5a1f]/45 focus:bg-white"
               />
 
+              <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[16px] text-black/25">
+                ⌕
+              </div>
+
             </div>
-
-
-            <select
-              name="stato"
-              defaultValue={
-                filterStatus
-              }
-              className="h-[58px] rounded-[16px] border border-black/10 bg-[#f5f4ef] px-4 text-[15px] font-semibold outline-none transition focus:border-[#ff5a1f]/45 focus:bg-white"
-            >
-              <option value="tutte">
-                Tutte
-              </option>
-
-              <option value="requested">
-                Da gestire
-              </option>
-
-              <option value="confirmed">
-                Confermate
-              </option>
-
-              <option value="picked_up">
-                Ritirate
-              </option>
-
-              <option value="returned">
-                Restituite
-              </option>
-
-              <option value="cancelled">
-                Annullate
-              </option>
-            </select>
 
 
             <button
               type="submit"
-              className="h-[58px] rounded-[16px] bg-[#181818] px-7 text-[15px] font-semibold text-white transition hover:bg-[#ff5a1f]"
+              className="h-[50px] rounded-[15px] bg-[#181818] px-6 text-[14px] font-semibold text-white transition hover:bg-[#ff5a1f]"
             >
-              Filtra
+              Cerca
             </button>
 
-          </form>
 
-
-          {(query ||
-            filterStatus !==
-              "tutte") && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-black/10 bg-[#f5f4ef] px-5 py-3">
-
-              <div className="text-[13px] font-medium text-black/45">
-                {
-                  filteredReservations.length
-                }{" "}
-                {filteredReservations.length ===
-                1
-                  ? "richiesta"
-                  : "richieste"}
-              </div>
-
-
+            {(query ||
+              view !==
+                "tutte" ||
+              legacyStatus) && (
               <Link
                 href="/admin/richieste"
-                className="text-[13px] font-semibold text-[#ff5a1f]"
+                className="flex h-[50px] items-center justify-center rounded-[15px] border border-black/10 bg-white px-5 text-[13px] font-semibold text-black/45 transition hover:bg-[#f6f5f0] hover:text-black"
               >
-                Rimuovi filtri
+                Azzera
               </Link>
+            )}
 
-            </div>
-          )}
+          </form>
 
         </section>
 
 
-        {/* =================================================
-            LIST TITLE
-            ================================================= */}
-
-        <div className="flex flex-col gap-4 pb-5 pt-10 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex items-end justify-between gap-5 px-1 pb-3 pt-7">
 
           <div>
 
-            <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#ff5a1f]">
-              Rental requests
+            <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-black/30">
+              Risultati
             </div>
 
-            <h2 className="mt-2 text-[40px] font-semibold tracking-[-0.052em] sm:text-[48px]">
-              Richieste.
-            </h2>
+            <div className="mt-1 text-[22px] font-semibold tracking-[-0.035em]">
+              {filtered.length}{" "}
+              {filtered.length ===
+              1
+                ? "richiesta"
+                : "richieste"}
+            </div>
 
           </div>
 
 
-          <div className="text-[14px] font-medium text-black/45">
-            {
-              filteredReservations.length
-            }{" "}
-            di{" "}
-            {
-              reservations.length
-            }
-          </div>
+          {view !==
+            "tutte" && (
+            <Link
+              href="/admin/richieste"
+              className="text-[12px] font-semibold text-black/35 transition hover:text-[#ff5a1f]"
+            >
+              Mostra tutte
+            </Link>
+          )}
 
         </div>
 
 
-        {/* =================================================
-            LIST
-            ================================================= */}
-
-        {filteredReservations.length >
+        {filtered.length ===
         0 ? (
-          <section className="space-y-4">
 
-            {filteredReservations.map(
-              (
-                reservation
-              ) => {
-                const customer =
-                  getCustomer(
-                    reservation.customers
-                  );
+          <section className="rounded-[24px] border border-black/10 bg-white p-8 text-center sm:p-12">
 
-                const days =
-                  rentalDays(
-                    reservation.start_date,
-                    reservation.end_date
-                  );
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#f1f0ea] text-[18px]">
+              —
+            </div>
 
-                const items =
-                  reservation.reservation_items ??
-                  [];
+            <h2 className="mt-4 text-[24px] font-semibold tracking-[-0.035em]">
+              Nessuna richiesta trovata.
+            </h2>
 
-                const totalPieces =
-                  items.reduce(
-                    (
-                      sum,
-                      item
-                    ) =>
-                      sum +
-                      item.quantity,
-                    0
-                  );
+            <p className="mx-auto mt-2 max-w-[520px] text-[14px] leading-6 text-black/40">
+              Cambia filtro oppure azzera
+              la ricerca per tornare
+              all'elenco completo.
+            </p>
 
-                const estimatedTotal =
-                  items.reduce(
-                    (
-                      sum,
-                      item
-                    ) =>
-                      sum +
-                      Number(
-                        item.price_day
-                      ) *
-                        item.quantity *
-                        days,
-                    0
-                  );
+          </section>
 
+        ) : (
 
-                return (
-                  <article
-                    key={
-                      reservation.id
-                    }
-                    className="group overflow-hidden rounded-[25px] border border-black/10 bg-white transition hover:border-[#ff5a1f]/20 hover:shadow-[0_16px_50px_rgba(0,0,0,0.05)]"
-                  >
+          <section className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
 
-                    <div
-                      className={`h-[5px] ${
-                        reservation.status ===
-                        "requested"
-                          ? "bg-[#d98a08]"
-                          : reservation.status ===
-                              "cancelled"
-                            ? "bg-[#cf3d32]"
-                            : "bg-[#181818]"
-                      }`}
-                    />
+            <div className="hidden grid-cols-[160px_minmax(180px,1fr)_175px_minmax(220px,1.2fr)_155px_180px_72px] gap-4 border-b border-black/10 bg-[#f5f4ef] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.09em] text-black/30 xl:grid">
+
+              <div>
+                Richiesta
+              </div>
+
+              <div>
+                Cliente
+              </div>
+
+              <div>
+                Periodo
+              </div>
+
+              <div>
+                Kit
+              </div>
+
+              <div>
+                Importo
+              </div>
+
+              <div>
+                Stato
+              </div>
+
+              <div className="text-right">
+                Apri
+              </div>
+
+            </div>
 
 
-                    <div className="p-6 sm:p-7">
+            <div className="divide-y divide-black/10">
 
-                      <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_210px_170px_auto] xl:items-center">
+              {filtered.map(
+                (
+                  reservation
+                ) => {
 
-                        {/* CUSTOMER */}
+                  const customer =
+                    first(
+                      reservation.customers
+                    );
 
-                        <div>
+                  const items =
+                    reservation.reservation_items ??
+                    [];
 
-                          <div className="flex flex-wrap items-center gap-2">
+                  const products =
+                    getProductNames(
+                      reservation
+                    );
 
-                            <span className="font-mono text-[12px] font-bold text-[#ff5a1f]">
-                              {
-                                reservation.reference
-                              }
-                            </span>
+                  const days =
+                    rentalDays(
+                      reservation.start_date,
+                      reservation.end_date
+                    );
 
-                            <StatusBadge
-                              status={
-                                reservation.status
-                              }
-                            />
+                  const estimate =
+                    estimatedTotal(
+                      reservation
+                    );
 
-                          </div>
+                  const quoteTotal =
+                    reservation.quoted_total ===
+                      null ||
+                    reservation.quoted_total ===
+                      undefined
+                      ? null
+                      : Number(
+                          reservation.quoted_total
+                        );
 
+                  const finalTotal =
+                    quoteTotal ??
+                    estimate;
 
-                          <h3 className="mt-3 text-[27px] font-semibold leading-tight tracking-[-0.04em]">
-                            {customer?.name ??
-                              "Cliente"}
-                          </h3>
+                  const quoteSent =
+                    Boolean(
+                      reservation.quote_sent_at
+                    );
 
+                  const pieces =
+                    items.reduce(
+                      (
+                        sum,
+                        item
+                      ) =>
+                        sum +
+                        item.quantity,
+                      0
+                    );
 
-                          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-black/42">
+                  return (
+                    <article
+                      key={
+                        reservation.id
+                      }
+                      className="group transition hover:bg-[#fcfbf8]"
+                    >
 
-                            <span>
-                              {customer?.email ??
-                                "Email non disponibile"}
-                            </span>
+                      <div className="grid gap-4 p-5 sm:p-6 xl:grid-cols-[160px_minmax(180px,1fr)_175px_minmax(220px,1.2fr)_155px_180px_72px] xl:items-center xl:px-5 xl:py-4">
 
-                            {customer?.phone && (
-                              <span>
-                                {
-                                  customer.phone
-                                }
-                              </span>
-                            )}
+                        <div className="min-w-0">
 
-                          </div>
+                          <Link
+                            href={`/admin/richieste/${reservation.id}`}
+                            className="font-mono text-[13px] font-bold text-black/75 transition hover:text-[#ff5a1f]"
+                          >
+                            {
+                              reservation.reference
+                            }
+                          </Link>
 
-
-                          <div className="mt-4 flex flex-wrap gap-2">
-
-                            {items
-                              .slice(
-                                0,
-                                3
+                          <div className="mt-1 text-[11px] text-black/30">
+                            {
+                              formatCreatedAt(
+                                reservation.created_at
                               )
-                              .map(
-                                (
-                                  item
-                                ) => {
-                                  const product =
-                                    getProduct(
-                                      item.products
-                                    );
-
-                                  return (
-                                    <span
-                                      key={
-                                        item.id
-                                      }
-                                      className="rounded-full bg-[#f1f0ea] px-3 py-1.5 text-[11px] font-semibold text-black/50"
-                                    >
-                                      {
-                                        item.quantity
-                                      }
-                                      ×{" "}
-                                      {product?.name ??
-                                        "Prodotto"}
-                                    </span>
-                                  );
-                                }
-                              )}
-
-
-                            {items.length >
-                              3 && (
-                              <span className="rounded-full bg-[#f1f0ea] px-3 py-1.5 text-[11px] font-semibold text-black/40">
-                                +
-                                {items.length -
-                                  3}{" "}
-                                altri
-                              </span>
-                            )}
-
+                            }
                           </div>
 
                         </div>
 
 
-                        {/* PERIOD */}
+                        <div className="min-w-0">
 
-                        <InfoColumn
-                          label="Periodo"
-                        >
-                          <div className="text-[15px] font-semibold">
-                            {formatDate(
-                              reservation.start_date
-                            )}
+                          <div className="truncate text-[15px] font-semibold">
+                            {customer?.name ??
+                              "Cliente"}
                           </div>
 
-                          <div className="mt-1 text-[13px] text-black/40">
-                            →{" "}
-                            {formatDate(
-                              reservation.end_date
-                            )}
+                          <div className="mt-1 truncate text-[11px] text-black/35">
+                            {customer?.email ??
+                              "—"}
                           </div>
 
-                          <div className="mt-2 text-[12px] font-medium text-black/35">
+                          {customer?.phone && (
+                            <div className="mt-0.5 truncate text-[11px] text-black/30">
+                              {
+                                customer.phone
+                              }
+                            </div>
+                          )}
+
+                        </div>
+
+
+                        <div>
+
+                          <div className="text-[13px] font-semibold text-black/65">
+                            {
+                              formatDate(
+                                reservation.start_date
+                              )
+                            }
+                            {" → "}
+                            {
+                              formatDate(
+                                reservation.end_date
+                              )
+                            }
+                          </div>
+
+                          <div className="mt-1 text-[11px] text-black/30">
                             {days}{" "}
                             {days ===
                             1
                               ? "giorno"
                               : "giorni"}
                           </div>
-                        </InfoColumn>
+
+                        </div>
 
 
-                        {/* VALUE */}
+                        <div className="min-w-0">
 
-                        <InfoColumn
-                          label="Richiesta"
-                        >
-                          <div className="text-[22px] font-semibold tracking-[-0.035em]">
+                          <div className="truncate text-[13px] font-semibold text-black/60">
+                            {products.length >
+                            0
+                              ? products
+                                  .slice(
+                                    0,
+                                    2
+                                  )
+                                  .join(
+                                    " · "
+                                  )
+                              : "Nessun prodotto"}
+                          </div>
+
+                          <div className="mt-1 text-[11px] text-black/30">
+                            {pieces}{" "}
+                            {pieces ===
+                            1
+                              ? "pezzo"
+                              : "pezzi"}
+
+                            {products.length >
+                              2 &&
+                              ` · +${
+                                products.length -
+                                2
+                              } altri`}
+                          </div>
+
+                        </div>
+
+
+                        <div>
+
+                          <div className="text-[16px] font-semibold tracking-[-0.025em]">
                             {
                               formatMoney(
-                                estimatedTotal
+                                finalTotal
                               )
                             }
                           </div>
 
-                          <div className="mt-1 text-[12px] text-black/40">
-                            {totalPieces}{" "}
-                            {totalPieces ===
-                            1
-                              ? "pezzo"
-                              : "pezzi"}
+                          <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-black/30">
+                            {quoteTotal !==
+                            null
+                              ? "Preventivo"
+                              : "Stima"}
                           </div>
 
-                          <div className="mt-2 text-[11px] text-black/30">
-                            {formatCreatedAt(
-                              reservation.created_at
-                            )}
-                          </div>
-
-                        </InfoColumn>
+                        </div>
 
 
-                        {/* ACTION */}
+                        <div className="flex flex-wrap items-center gap-2">
 
-                        <Link
-                          href={`/admin/richieste/${reservation.id}`}
-                          className="flex h-[52px] items-center justify-center rounded-[15px] bg-[#181818] px-6 text-[14px] font-semibold text-white transition group-hover:bg-[#ff5a1f]"
-                        >
-                          {canOperate
-                            ? "Gestisci →"
-                            : "Apri →"}
-                        </Link>
+                          <span
+                            className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.055em] ${statusClasses(
+                              reservation.status
+                            )}`}
+                          >
+                            {
+                              statusLabel(
+                                reservation.status
+                              )
+                            }
+                          </span>
+
+
+                          {reservation.status ===
+                            "requested" && (
+                            <span
+                              className={`rounded-full px-3 py-1.5 text-[10px] font-bold ${
+                                quoteSent
+                                  ? "bg-[#e9f6ee] text-[#168a50]"
+                                  : "bg-[#fff0e9] text-[#b14a20]"
+                              }`}
+                            >
+                              {quoteSent
+                                ? `Preventivo inviato${
+                                    reservation.quote_revision
+                                      ? ` · rev. ${reservation.quote_revision}`
+                                      : ""
+                                  }`
+                                : "Da preventivare"}
+                            </span>
+                          )}
+
+                        </div>
+
+
+                        <div className="xl:text-right">
+
+                          <Link
+                            href={`/admin/richieste/${reservation.id}`}
+                            className="inline-flex h-10 items-center justify-center rounded-[12px] bg-[#181818] px-4 text-[12px] font-semibold text-white transition group-hover:bg-[#ff5a1f]"
+                          >
+                            {canOperate
+                              ? "Gestisci"
+                              : "Apri"}
+                          </Link>
+
+                        </div>
 
                       </div>
 
-                    </div>
-                  </article>
-                );
-              }
-            )}
-
-          </section>
-        ) : (
-          <section className="overflow-hidden rounded-[28px] border border-black/10 bg-white">
-
-            <div className="grid min-h-[360px] lg:grid-cols-[1fr_300px]">
-
-              <div className="flex items-center p-8 sm:p-12">
-
-                <div>
-
-                  <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#ff5a1f]">
-                    Rental Control
-                  </div>
-
-                  <h2 className="mt-3 text-[40px] font-semibold leading-[0.96] tracking-[-0.052em]">
-                    {reservations.length ===
-                    0
-                      ? "Nessuna richiesta ricevuta."
-                      : "Nessuna richiesta corrisponde ai filtri."}
-                  </h2>
-
-
-                  {reservations.length >
-                    0 && (
-                    <Link
-                      href="/admin/richieste"
-                      className="mt-7 inline-flex h-[56px] items-center justify-center rounded-[16px] bg-[#181818] px-6 text-[15px] font-semibold text-white transition hover:bg-[#ff5a1f]"
-                    >
-                      Mostra tutte
-                    </Link>
-                  )}
-
-                </div>
-
-              </div>
-
-
-              <div className="relative hidden overflow-hidden bg-[#181818] lg:block">
-
-                <div className="absolute -right-20 -top-20 h-[220px] w-[220px] rounded-full bg-[#ff5a1f]/20" />
-
-                <div className="absolute bottom-9 left-9 text-white">
-
-                  <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ff7b4a]">
-                    LAP GEAR
-                  </div>
-
-                  <div className="mt-2 text-[25px] font-semibold">
-                    Rental
-                    <br />
-                    Control.
-                  </div>
-
-                </div>
-
-              </div>
+                    </article>
+                  );
+                }
+              )}
 
             </div>
+
           </section>
         )}
 
       </div>
+
     </main>
-  );
-}
-
-
-/* =========================================================
-   COMPONENTS
-   ========================================================= */
-
-function HeroStat({
-  value,
-  label,
-  warning = false,
-  success = false,
-}: {
-  value: number;
-  label: string;
-  warning?: boolean;
-  success?: boolean;
-}) {
-  return (
-    <div className="rounded-[17px] border border-white/10 bg-white/[0.06] p-4">
-
-      <div
-        className={`text-[28px] font-semibold tracking-[-0.045em] ${
-          warning
-            ? "text-[#f4b64c]"
-            : success
-              ? "text-[#6bd49c]"
-              : "text-white"
-        }`}
-      >
-        {
-          value
-        }
-      </div>
-
-      <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/38">
-        {
-          label
-        }
-      </div>
-
-    </div>
-  );
-}
-
-
-function PipelineCard({
-  number,
-  label,
-  value,
-  description,
-  tone = "default",
-}: {
-  number: string;
-  label: string;
-  value: number;
-  description: string;
-
-  tone?:
-    | "default"
-    | "warning"
-    | "blue"
-    | "success";
-}) {
-  const rail = {
-    default:
-      "bg-[#181818]",
-
-    warning:
-      "bg-[#d98a08]",
-
-    blue:
-      "bg-[#245bff]",
-
-    success:
-      "bg-[#168a50]",
-  }[
-    tone
-  ];
-
-
-  const badge = {
-    default:
-      "bg-[#f1f0ea] text-black/45",
-
-    warning:
-      "bg-[#fff2d5] text-[#aa6b08]",
-
-    blue:
-      "bg-[#edf2ff] text-[#245bff]",
-
-    success:
-      "bg-[#e9f6ee] text-[#168a50]",
-  }[
-    tone
-  ];
-
-
-  return (
-    <article className="relative overflow-hidden rounded-[22px] border border-black/10 bg-white p-5 sm:p-6">
-
-      <div
-        className={`absolute inset-x-0 top-0 h-[4px] ${rail}`}
-      />
-
-
-      <div className="flex items-start justify-between gap-5">
-
-        <div>
-
-          <div className="text-[12px] font-bold uppercase tracking-[0.1em] text-black/35">
-            {
-              label
-            }
-          </div>
-
-          <div className="mt-3 text-[37px] font-semibold leading-none tracking-[-0.055em]">
-            {
-              value
-            }
-          </div>
-
-          <p className="mt-2 text-[13px] leading-5 text-black/40">
-            {
-              description
-            }
-          </p>
-
-        </div>
-
-
-        <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${badge}`}
-        >
-          {
-            number
-          }
-        </div>
-
-      </div>
-
-    </article>
-  );
-}
-
-
-function StatusBadge({
-  status,
-}: {
-  status:
-    ReservationStatus;
-}) {
-  return (
-    <span
-      className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.065em] ${statusClasses(
-        status
-      )}`}
-    >
-      {
-        statusLabel(
-          status
-        )
-      }
-    </span>
-  );
-}
-
-
-function InfoColumn({
-  label,
-  children,
-}: {
-  label: string;
-
-  children:
-    React.ReactNode;
-}) {
-  return (
-    <div>
-
-      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-black/30">
-        {
-          label
-        }
-      </div>
-
-      {
-        children
-      }
-
-    </div>
   );
 }
