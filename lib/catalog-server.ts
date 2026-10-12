@@ -106,21 +106,14 @@ function getCategory(
 }
 
 function normalizeCategorySlug(
-  value:
-    | string
-    | null
-    | undefined
-): CategorySlug {
-  if (
-    value &&
-    CATEGORY_SLUGS.includes(
-      value as CategorySlug
-    )
-  ) {
-    return value as CategorySlug;
-  }
+  value: string | null | undefined
+) {
+  const slug =
+    String(value ?? "")
+      .trim()
+      .toLowerCase();
 
-  return "accessori";
+  return slug || "accessori";
 }
 
 function normalizeAttributes(
