@@ -1001,7 +1001,7 @@ export default async function AdminProductsPage({
 
 
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
 
 
 
@@ -1034,6 +1034,24 @@ export default async function AdminProductsPage({
                       Consultazione catalogo
 
                     </div>
+
+                  )}
+
+
+
+                  {canEditProducts && (
+
+                    <Link
+
+                      href="/admin/categorie"
+
+                      className="flex h-[58px] items-center justify-center rounded-[16px] border border-black/10 bg-white px-6 text-[15px] font-semibold text-black/65 transition hover:border-[#ff5a1f]/25 hover:bg-[#fff0e9] hover:text-[#e94b12]"
+
+                    >
+
+                      Categorie
+
+                    </Link>
 
                   )}
 

@@ -11,8 +11,8 @@ import {
 } from "@/components/admin/ReturnChecklist";
 
 import {
-  RequestStatusForm,
-} from "@/components/admin/RequestStatusForm";
+  RentalWorkflowPanel,
+} from "@/components/admin/RentalWorkflowPanel";
 
 import {
   QuotePanel,
@@ -1289,1240 +1289,995 @@ export default async function AdminRequestPage({
       totalQuantity;
 
 
+  const checkoutMissing =
+    checkoutChecklistUnits.filter(
+      (unit) =>
+        !unit.condition
+    ).length;
+
+
+  const returnMissing =
+    returnChecklistUnits.filter(
+      (unit) =>
+        !unit.condition
+    ).length;
+
+
   /* =======================================================
      RENDER
      ======================================================= */
 
   return (
     <main className="min-h-screen bg-[#ebeae4] px-5 pb-16 pt-6 text-[#111111] sm:px-8 lg:px-10 lg:pb-20 xl:px-14">
-
-      <div className="mx-auto max-w-[1500px]">
-
-        {/* =================================================
-            BREADCRUMB
-            ================================================= */}
-
+      <div className="mx-auto max-w-[1460px]">
         <div className="mb-5 flex items-center gap-2 overflow-hidden text-[13px] font-semibold text-black/40">
-
           <Link
             href="/admin"
             className="shrink-0 transition hover:text-[#ff5a1f]"
           >
             Admin
           </Link>
-
-          <span>
-            /
-          </span>
-
+          <span>/</span>
           <Link
             href="/admin/richieste"
             className="shrink-0 transition hover:text-[#ff5a1f]"
           >
             Richieste
           </Link>
-
-          <span>
-            /
-          </span>
-
+          <span>/</span>
           <span className="truncate text-black/65">
-            {
-              reservation.reference
-            }
+            {reservation.reference}
           </span>
-
         </div>
 
-
-        {/* =================================================
-            HERO
-            ================================================= */}
-
-        <section className="overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_18px_60px_rgba(0,0,0,0.06)]">
-
-          <div className="grid xl:grid-cols-[1fr_400px]">
-
-            <div className="relative overflow-hidden p-8 sm:p-10 lg:p-12">
-
-              <div className="pointer-events-none absolute -right-32 -top-36 h-[360px] w-[360px] rounded-full bg-[#ff5a1f]/[0.07]" />
-
-
-              <div className="relative">
-
-                <div className="flex flex-wrap items-center gap-3">
-
-                  <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#ff5a1f]">
-                    Rental Request
-                  </div>
-
-                  <StatusBadge
-                    status={
-                      reservation.status
-                    }
-                  />
-
-                </div>
-
-
-                <h1 className="mt-4 break-words font-mono text-[43px] font-semibold leading-[0.94] tracking-[-0.055em] sm:text-[58px]">
-                  {
-                    reservation.reference
+        {/* HEADER COMPATTO */}
+        <section className="overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-[0_16px_50px_rgba(0,0,0,0.05)]">
+          <div className="grid xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
+            <div className="p-6 sm:p-8">
+              <div className="flex flex-wrap items-center gap-3">
+                <StatusBadge
+                  status={
+                    reservation.status
                   }
-                </h1>
+                />
 
-
-                <div className="mt-6 text-[20px] font-semibold tracking-[-0.025em]">
-                  {customer?.name ??
-                    "Cliente"}
-                </div>
-
-
-                <div className="mt-7">
-
-                  <Link
-                    href="/admin/richieste"
-                    className="inline-flex h-[52px] items-center justify-center rounded-[15px] border border-black/10 bg-[#f1f0ea] px-5 text-[14px] font-semibold text-black/55 transition hover:bg-white hover:text-black"
-                  >
-                    ← Richieste
-                  </Link>
-
-                </div>
-
+                {reservation.quote_sent_at ? (
+                  <span className="rounded-full bg-[#e9f6ee] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[#168a50]">
+                    Preventivo inviato
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-[#f1f0ea] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-black/35">
+                    Preventivo non inviato
+                  </span>
+                )}
               </div>
 
-            </div>
-
-
-            {/* RIGHT */}
-
-            <div className="relative overflow-hidden bg-[#181818] p-8 text-white sm:p-9">
-
-              <div className="pointer-events-none absolute -right-24 -top-24 h-[230px] w-[230px] rounded-full bg-[#ff5a1f]/20" />
-
-
-              <div className="relative">
-
-                <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ff7b4a]">
-                  Request overview
-                </div>
-
-
-                <div className="mt-7 grid grid-cols-2 gap-3">
-
-                  <HeroStat
-                    value={
-                      days
-                    }
-                    label={
-                      days ===
-                      1
-                        ? "Giorno"
-                        : "Giorni"
-                    }
-                  />
-
-                  <HeroStat
-                    value={
-                      totalQuantity
-                    }
-                    label="Pezzi"
-                  />
-
-                  <HeroStat
-                    value={
-                      totalAssigned
-                    }
-                    label="Assegnati"
-                    success={
-                      allAssigned
-                    }
-                  />
-
-                  <HeroStat
-                    value={
-                      items.length
-                    }
-                    label="Prodotti"
-                  />
-
-                </div>
-
-
-                <div className="mt-6 border-t border-white/10 pt-5">
-
-                  <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-white/30">
-                    Stima noleggio
+              <div className="mt-4 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="min-w-0">
+                  <div className="font-mono text-[28px] font-semibold tracking-[-0.04em] sm:text-[34px]">
+                    {reservation.reference}
                   </div>
 
-                  <div className="mt-2 text-[31px] font-semibold tracking-[-0.045em]">
-                    {
-                      formatMoney(
-                        total
-                      )
-                    }
+                  <div className="mt-2 text-[24px] font-semibold tracking-[-0.035em]">
+                    {customer?.name ?? "Cliente"}
                   </div>
 
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        {/* =================================================
-            WORKFLOW
-            ================================================= */}
-
-        <section className="mt-6 overflow-hidden rounded-[24px] border border-black/10 bg-white">
-
-          <div className="grid sm:grid-cols-4">
-
-            <WorkflowStep
-              number="01"
-              label="Richiesta"
-              active={
-                reservation.status ===
-                  "requested"
-              }
-              complete={
-                reservation.status !==
-                  "requested" &&
-                reservation.status !==
-                  "cancelled"
-              }
-            />
-
-            <WorkflowStep
-              number="02"
-              label="Confermata"
-              active={
-                reservation.status ===
-                  "confirmed"
-              }
-              complete={
-                reservation.status ===
-                  "picked_up" ||
-                reservation.status ===
-                  "returned"
-              }
-            />
-
-            <WorkflowStep
-              number="03"
-              label="Ritirata"
-              active={
-                reservation.status ===
-                  "picked_up"
-              }
-              complete={
-                reservation.status ===
-                  "returned"
-              }
-            />
-
-            <WorkflowStep
-              number="04"
-              label="Restituita"
-              active={
-                reservation.status ===
-                  "returned"
-              }
-              complete={
-                false
-              }
-            />
-
-          </div>
-
-        </section>
-
-
-        {/* =================================================
-            MAIN GRID
-            ================================================= */}
-
-        <div className="mt-7 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-
-          {/* =================================================
-              LEFT
-              ================================================= */}
-
-          <div className="space-y-6">
-
-            {/* CUSTOMER / PERIOD */}
-
-            <section className="grid gap-5 lg:grid-cols-2">
-
-              <article className="rounded-[24px] border border-black/10 bg-white p-6 sm:p-7">
-
-                <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
-                  Cliente
-                </div>
-
-                <h2 className="mt-3 text-[28px] font-semibold tracking-[-0.04em]">
-                  {customer?.name ??
-                    "—"}
-                </h2>
-
-
-                <div className="mt-5 space-y-3">
-
-                  <InfoRow
-                    label="Email"
-                    value={
-                      customer?.email ??
-                      "—"
-                    }
-                  />
-
-                  <InfoRow
-                    label="Telefono"
-                    value={
-                      customer?.phone ||
-                      "Non indicato"
-                    }
-                  />
-
-                </div>
-
-              </article>
-
-
-              <article className="rounded-[24px] border border-black/10 bg-white p-6 sm:p-7">
-
-                <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
-                  Periodo
-                </div>
-
-
-                <div className="mt-4">
-
-                  <div className="text-[13px] font-semibold text-black/35">
-                    Ritiro
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-black/40">
+                    <span>{customer?.email ?? "—"}</span>
+                    {customer?.phone && (
+                      <span>{customer.phone}</span>
+                    )}
                   </div>
+                </div>
 
-                  <div className="mt-1 text-[22px] font-semibold">
-                    {formatDate(
+                <div className="grid shrink-0 grid-cols-2 gap-3 sm:grid-cols-3">
+                  <CompactStat
+                    label="Dal"
+                    value={formatDate(
                       reservation.start_date
                     )}
-                  </div>
-
-                </div>
-
-
-                <div className="mt-4 border-t border-black/10 pt-4">
-
-                  <div className="text-[13px] font-semibold text-black/35">
-                    Riconsegna
-                  </div>
-
-                  <div className="mt-1 text-[22px] font-semibold">
-                    {formatDate(
+                  />
+                  <CompactStat
+                    label="Al"
+                    value={formatDate(
                       reservation.end_date
                     )}
-                  </div>
+                  />
+                  <CompactStat
+                    label="Durata"
+                    value={`${days} ${days === 1 ? "giorno" : "giorni"}`}
+                  />
+                </div>
+              </div>
+            </div>
 
+            <div className="flex flex-col justify-between bg-[#181818] p-6 text-white sm:p-8">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#ff7b4a]">
+                  Valore richiesta
                 </div>
 
-
-                <div className="mt-5 rounded-[14px] bg-[#f3f2ed] px-4 py-3 text-[13px] font-semibold text-black/50">
-                  {days}{" "}
-                  {days ===
-                  1
-                    ? "giorno di noleggio"
-                    : "giorni di noleggio"}
+                <div className="mt-2 text-[34px] font-semibold tracking-[-0.05em]">
+                  {formatMoney(
+                    quotedTotal ??
+                      total
+                  )}
                 </div>
 
-              </article>
-
-            </section>
-
-
-            {/* =================================================
-                QUOTE
-                ================================================= */}
-
-            <QuotePanel
-              requestId={
-                reservation.id
-              }
-              reference={
-                reservation.reference
-              }
-              customerName={
-                customer?.name ??
-                "Cliente"
-              }
-              customerEmail={
-                customer?.email ??
-                ""
-              }
-              estimateTotal={
-                total
-              }
-              suggestedDeposit={
-                suggestedDeposit
-              }
-              quotedTotal={
-                quotedTotal
-              }
-              quoteDeposit={
-                quoteDeposit
-              }
-              quotePaymentMethod={
-                reservation.quote_payment_method
-              }
-              quotePaymentDetails={
-                reservation.quote_payment_details
-              }
-              quoteValidUntil={
-                reservation.quote_valid_until
-              }
-              quoteLogistics={
-                reservation.quote_logistics
-              }
-              quoteNotes={
-                reservation.quote_notes
-              }
-              quoteSentAt={
-                reservation.quote_sent_at
-              }
-              quoteRevision={
-                quoteRevision
-              }
-              canEdit={
-                canEditQuote
-              }
-            />
-
-
-            {/* =================================================
-                EQUIPMENT
-                ================================================= */}
-
-            <section className="overflow-hidden rounded-[25px] border border-black/10 bg-white">
-
-              <div className="border-b border-black/10 bg-[#fbfaf7] p-6 sm:p-7">
-
-                <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
-                  Equipment
+                <div className="mt-2 text-[12px] text-white/35">
+                  {quotedTotal !== null
+                    ? "Totale preventivato"
+                    : "Stima da catalogo"}
                 </div>
-
-
-                <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-
-                  <div>
-
-                    <h2 className="text-[30px] font-semibold tracking-[-0.045em]">
-                      Materiale richiesto.
-                    </h2>
-
-                    <p className="mt-2 text-[14px] leading-6 text-black/45">
-                      La selezione mostra solo
-                      le unità realmente libere
-                      nelle date del noleggio.
-                    </p>
-
-                  </div>
-
-
-                  <div
-                    className={`rounded-full px-4 py-2 text-[12px] font-semibold ${
-                      allAssigned
-                        ? "bg-[#e9f6ee] text-[#168a50]"
-                        : "bg-[#f1f0ea] text-black/45"
-                    }`}
-                  >
-                    {
-                      totalAssigned
-                    }
-                    /
-                    {
-                      totalQuantity
-                    }{" "}
-                    assegnate
-                  </div>
-
-                </div>
-
               </div>
 
+              <Link
+                href="/admin/richieste"
+                className="mt-6 flex h-[48px] items-center justify-center rounded-[14px] border border-white/10 bg-white/[0.07] px-5 text-[13px] font-semibold text-white transition hover:bg-white hover:text-[#181818]"
+              >
+                ← Tutte le richieste
+              </Link>
+            </div>
+          </div>
+        </section>
 
-              {/* ASSIGNMENT ERROR */}
+        <div className="mt-6">
+          <RentalWorkflowPanel
+            requestId={
+              reservation.id
+            }
+            currentStatus={
+              reservation.status
+            }
+            totalAssigned={
+              totalAssigned
+            }
+            totalQuantity={
+              totalQuantity
+            }
+            checkoutMissing={
+              checkoutMissing
+            }
+            returnMissing={
+              returnMissing
+            }
+            canOperate={
+              canOperate
+            }
+          />
+        </div>
 
-              {query.assignmentError && (
-                <div className="border-b border-[#cf3d32]/15 bg-[#fff0ee] px-6 py-4 sm:px-7">
+        {query.statusError && (
+          <div className="mt-4 rounded-[15px] border border-[#cf3d32]/15 bg-[#fff0ee] px-5 py-4 text-[13px] font-medium leading-6 text-[#9d352c]">
+            {query.statusError}
+          </div>
+        )}
 
-                  <div className="flex items-start gap-3">
+        {query.statusSuccess && (
+          <div className="mt-4 rounded-[15px] border border-[#168a50]/15 bg-[#e9f6ee] px-5 py-4 text-[13px] font-semibold text-[#168a50]">
+            ✓ {query.statusSuccess}
+          </div>
+        )}
 
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#cf3d32] text-[12px] font-bold text-white">
-                      !
-                    </div>
-
-                    <div>
-
-                      <div className="text-[11px] font-bold uppercase tracking-[0.09em] text-[#b7352b]">
-                        Assegnazione non riuscita
-                      </div>
-
-                      <div className="mt-1 text-[13px] leading-6 text-[#9d352c]">
-                        {
-                          query.assignmentError
-                        }
-                      </div>
-
-                    </div>
-
+        <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_330px]">
+          <div className="space-y-5">
+            {/* PREVENTIVO */}
+            <details
+              open={
+                reservation.status ===
+                  "requested" &&
+                !reservation.quote_sent_at
+              }
+              className="group overflow-hidden rounded-[24px] border border-black/10 bg-white"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-[#fbfaf7] px-6 py-5 sm:px-7">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+                    Preventivo
                   </div>
-
-                </div>
-              )}
-
-
-              {/* ASSIGNMENT SUCCESS */}
-
-              {query.assignmentSuccess && (
-                <div className="border-b border-[#168a50]/15 bg-[#e9f6ee] px-6 py-4 sm:px-7">
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#168a50] text-[12px] font-bold text-white">
-                      ✓
-                    </div>
-
-                    <div className="text-[13px] font-semibold text-[#168a50]">
-                      {
-                        query.assignmentSuccess
-                      }
-                    </div>
-
+                  <div className="mt-1 text-[20px] font-semibold tracking-[-0.03em]">
+                    {reservation.quote_sent_at
+                      ? "PDF inviato al cliente"
+                      : quotedTotal !== null
+                        ? "Bozza salvata"
+                        : "Da preparare"}
                   </div>
-
                 </div>
-              )}
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f1f0ea] text-[18px] text-black/40 transition group-open:rotate-45">
+                  +
+                </div>
+              </summary>
+
+              <div className="border-t border-black/10 p-4 sm:p-5">
+                <QuotePanel
+                  requestId={
+                    reservation.id
+                  }
+                  reference={
+                    reservation.reference
+                  }
+                  customerName={
+                    customer?.name ??
+                    "Cliente"
+                  }
+                  customerEmail={
+                    customer?.email ??
+                    ""
+                  }
+                  estimateTotal={
+                    total
+                  }
+                  suggestedDeposit={
+                    suggestedDeposit
+                  }
+                  quotedTotal={
+                    quotedTotal
+                  }
+                  quoteDeposit={
+                    quoteDeposit
+                  }
+                  quotePaymentMethod={
+                    reservation.quote_payment_method
+                  }
+                  quotePaymentDetails={
+                    reservation.quote_payment_details
+                  }
+                  quoteValidUntil={
+                    reservation.quote_valid_until
+                  }
+                  quoteLogistics={
+                    reservation.quote_logistics
+                  }
+                  quoteNotes={
+                    reservation.quote_notes
+                  }
+                  quoteSentAt={
+                    reservation.quote_sent_at
+                  }
+                  quoteRevision={
+                    quoteRevision
+                  }
+                  canEdit={
+                    canEditQuote
+                  }
+                />
+              </div>
+            </details>
+
+            {/* MATERIALE / ASSEGNAZIONI */}
+            <details
+              id="materiale"
+              open={
+                reservation.status ===
+                  "confirmed" &&
+                !allAssigned
+              }
+              className="group overflow-hidden rounded-[24px] border border-black/10 bg-white"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-[#fbfaf7] px-6 py-5 sm:px-7">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+                    Materiale
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-3">
+                    <div className="text-[20px] font-semibold tracking-[-0.03em]">
+                      {totalQuantity} {totalQuantity === 1 ? "pezzo" : "pezzi"}
+                    </div>
+
+                    <div className={`rounded-full px-3 py-1 text-[10px] font-bold ${
+                      allAssigned
+                        ? "bg-[#e9f6ee] text-[#168a50]"
+                        : "bg-[#fff2d5] text-[#aa6b08]"
+                    }`}>
+                      {totalAssigned}/{totalQuantity} unità assegnate
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f1f0ea] text-[18px] text-black/40 transition group-open:rotate-45">
+                  +
+                </div>
+              </summary>
+
+              <div className="border-t border-black/10 p-4 sm:p-5">
+                    {/* =================================================
+                        EQUIPMENT
+                        ================================================= */}
+
+                    <section className="overflow-hidden rounded-[25px] border border-black/10 bg-white">
+
+                      <div className="border-b border-black/10 bg-[#fbfaf7] p-6 sm:p-7">
+
+                        <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
+                          Equipment
+                        </div>
 
 
-              <div className="divide-y divide-black/10">
-
-                {items.map(
-                  (
-                    item
-                  ) => {
-                    const product =
-                      first(
-                        item.products
-                      );
-
-
-                    const assignments =
-                      item.unit_assignments ??
-                      [];
-
-
-                    const assignedIds =
-                      new Set(
-                        assignments.map(
-                          (
-                            assignment
-                          ) =>
-                            Number(
-                              assignment.product_unit_id
-                            )
-                        )
-                      );
-
-
-                    /*
-                     * =================================================
-                     * UNITÀ REALMENTE SELEZIONABILI
-                     * =================================================
-                     *
-                     * 1. prodotto corretto
-                     * 2. stato available
-                     * 3. non già assegnata a questa riga
-                     * 4. nessun blocco calendario
-                     * 5. non occupata da altro noleggio sovrapposto
-                     */
-
-                    const candidateUnits =
-                      units.filter(
-                        (
-                          unit
-                        ) => {
-                          const unitId =
-                            Number(
-                              unit.id
-                            );
-
-
-                          return (
-                            Number(
-                              unit.product_id
-                            ) ===
-                              Number(
-                                item.product_id
-                              ) &&
-                            unit.status ===
-                              "available" &&
-                            !assignedIds.has(
-                              unitId
-                            ) &&
-                            !blockedUnitIds.has(
-                              unitId
-                            ) &&
-                            !busyUnitIds.has(
-                              unitId
-                            )
-                          );
-                        }
-                      );
-
-
-                    const remaining =
-                      Math.max(
-                        0,
-                        item.quantity -
-                          assignments.length
-                      );
-
-
-                    const lineTotal =
-                      Number(
-                        item.price_day
-                      ) *
-                      item.quantity *
-                      days;
-
-
-                    return (
-                      <article
-                        key={
-                          item.id
-                        }
-                        className="p-6 sm:p-7"
-                      >
-
-                        {/* PRODUCT */}
-
-                        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 
                           <div>
 
-                            <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-[30px] font-semibold tracking-[-0.045em]">
+                              Materiale richiesto.
+                            </h2>
 
-                              <span className="rounded-full bg-[#181818] px-3 py-1.5 text-[11px] font-bold text-white">
-                                {
-                                  item.quantity
-                                }×
-                              </span>
-
-
-                              <span
-                                className={`rounded-full px-3 py-1.5 text-[11px] font-bold ${
-                                  remaining ===
-                                  0
-                                    ? "bg-[#e9f6ee] text-[#168a50]"
-                                    : "bg-[#fff2d5] text-[#aa6b08]"
-                                }`}
-                              >
-                                {remaining ===
-                                0
-                                  ? "Unità complete"
-                                  : `${remaining} da assegnare`}
-                              </span>
-
-                            </div>
-
-
-                            <h3 className="mt-3 text-[25px] font-semibold tracking-[-0.04em]">
-                              {product?.name ??
-                                "Prodotto"}
-                            </h3>
-
-
-                            <div className="mt-2 text-[13px] text-black/42">
-                              €
-                              {Number(
-                                item.price_day
-                              ).toFixed(
-                                2
-                              )}{" "}
-                              / giorno ×{" "}
-                              {days}{" "}
-                              {days ===
-                              1
-                                ? "giorno"
-                                : "giorni"}
-                            </div>
+                            <p className="mt-2 text-[14px] leading-6 text-black/45">
+                              La selezione mostra solo
+                              le unità realmente libere
+                              nelle date del noleggio.
+                            </p>
 
                           </div>
 
 
-                          <div className="text-left sm:text-right">
+                          <div
+                            className={`rounded-full px-4 py-2 text-[12px] font-semibold ${
+                              allAssigned
+                                ? "bg-[#e9f6ee] text-[#168a50]"
+                                : "bg-[#f1f0ea] text-black/45"
+                            }`}
+                          >
+                            {
+                              totalAssigned
+                            }
+                            /
+                            {
+                              totalQuantity
+                            }{" "}
+                            assegnate
+                          </div>
 
-                            <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
-                              Riga
+                        </div>
+
+                      </div>
+
+
+                      {/* ASSIGNMENT ERROR */}
+
+                      {query.assignmentError && (
+                        <div className="border-b border-[#cf3d32]/15 bg-[#fff0ee] px-6 py-4 sm:px-7">
+
+                          <div className="flex items-start gap-3">
+
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#cf3d32] text-[12px] font-bold text-white">
+                              !
                             </div>
 
-                            <div className="mt-1 text-[23px] font-semibold">
+                            <div>
+
+                              <div className="text-[11px] font-bold uppercase tracking-[0.09em] text-[#b7352b]">
+                                Assegnazione non riuscita
+                              </div>
+
+                              <div className="mt-1 text-[13px] leading-6 text-[#9d352c]">
+                                {
+                                  query.assignmentError
+                                }
+                              </div>
+
+                            </div>
+
+                          </div>
+
+                        </div>
+                      )}
+
+
+                      {/* ASSIGNMENT SUCCESS */}
+
+                      {query.assignmentSuccess && (
+                        <div className="border-b border-[#168a50]/15 bg-[#e9f6ee] px-6 py-4 sm:px-7">
+
+                          <div className="flex items-center gap-3">
+
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#168a50] text-[12px] font-bold text-white">
+                              ✓
+                            </div>
+
+                            <div className="text-[13px] font-semibold text-[#168a50]">
                               {
-                                formatMoney(
-                                  lineTotal
-                                )
+                                query.assignmentSuccess
                               }
                             </div>
 
                           </div>
 
                         </div>
+                      )}
 
 
-                        {/* =================================================
-                            ASSIGNED UNITS
-                            ================================================= */}
+                      <div className="divide-y divide-black/10">
 
-                        <div className="mt-6">
+                        {items.map(
+                          (
+                            item
+                          ) => {
+                            const product =
+                              first(
+                                item.products
+                              );
 
-                          <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-black/35">
-                            Unità assegnate
-                          </div>
+
+                            const assignments =
+                              item.unit_assignments ??
+                              [];
 
 
-                          {assignments.length ===
-                          0 ? (
-                            <div className="mt-3 rounded-[15px] border border-dashed border-black/15 bg-[#f6f5f0] px-4 py-4 text-[13px] text-black/40">
-                              Nessuna unità ancora
-                              assegnata.
-                            </div>
-                          ) : (
-                            <div className="mt-3 grid gap-2">
+                            const assignedIds =
+                              new Set(
+                                assignments.map(
+                                  (
+                                    assignment
+                                  ) =>
+                                    Number(
+                                      assignment.product_unit_id
+                                    )
+                                )
+                              );
 
-                              {assignments.map(
+
+                            /*
+                             * =================================================
+                             * UNITÀ REALMENTE SELEZIONABILI
+                             * =================================================
+                             *
+                             * 1. prodotto corretto
+                             * 2. stato available
+                             * 3. non già assegnata a questa riga
+                             * 4. nessun blocco calendario
+                             * 5. non occupata da altro noleggio sovrapposto
+                             */
+
+                            const candidateUnits =
+                              units.filter(
                                 (
-                                  assignment
+                                  unit
                                 ) => {
-                                  const unit =
-                                    first(
-                                      assignment.product_units
+                                  const unitId =
+                                    Number(
+                                      unit.id
                                     );
 
 
                                   return (
-                                    <div
-                                      key={
-                                        assignment.id
+                                    Number(
+                                      unit.product_id
+                                    ) ===
+                                      Number(
+                                        item.product_id
+                                      ) &&
+                                    unit.status ===
+                                      "available" &&
+                                    !assignedIds.has(
+                                      unitId
+                                    ) &&
+                                    !blockedUnitIds.has(
+                                      unitId
+                                    ) &&
+                                    !busyUnitIds.has(
+                                      unitId
+                                    )
+                                  );
+                                }
+                              );
+
+
+                            const remaining =
+                              Math.max(
+                                0,
+                                item.quantity -
+                                  assignments.length
+                              );
+
+
+                            const lineTotal =
+                              Number(
+                                item.price_day
+                              ) *
+                              item.quantity *
+                              days;
+
+
+                            return (
+                              <article
+                                key={
+                                  item.id
+                                }
+                                className="p-6 sm:p-7"
+                              >
+
+                                {/* PRODUCT */}
+
+                                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+
+                                  <div>
+
+                                    <div className="flex flex-wrap items-center gap-2">
+
+                                      <span className="rounded-full bg-[#181818] px-3 py-1.5 text-[11px] font-bold text-white">
+                                        {
+                                          item.quantity
+                                        }×
+                                      </span>
+
+
+                                      <span
+                                        className={`rounded-full px-3 py-1.5 text-[11px] font-bold ${
+                                          remaining ===
+                                          0
+                                            ? "bg-[#e9f6ee] text-[#168a50]"
+                                            : "bg-[#fff2d5] text-[#aa6b08]"
+                                        }`}
+                                      >
+                                        {remaining ===
+                                        0
+                                          ? "Unità complete"
+                                          : `${remaining} da assegnare`}
+                                      </span>
+
+                                    </div>
+
+
+                                    <h3 className="mt-3 text-[25px] font-semibold tracking-[-0.04em]">
+                                      {product?.name ??
+                                        "Prodotto"}
+                                    </h3>
+
+
+                                    <div className="mt-2 text-[13px] text-black/42">
+                                      €
+                                      {Number(
+                                        item.price_day
+                                      ).toFixed(
+                                        2
+                                      )}{" "}
+                                      / giorno ×{" "}
+                                      {days}{" "}
+                                      {days ===
+                                      1
+                                        ? "giorno"
+                                        : "giorni"}
+                                    </div>
+
+                                  </div>
+
+
+                                  <div className="text-left sm:text-right">
+
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
+                                      Riga
+                                    </div>
+
+                                    <div className="mt-1 text-[23px] font-semibold">
+                                      {
+                                        formatMoney(
+                                          lineTotal
+                                        )
                                       }
-                                      className="flex flex-col gap-3 rounded-[15px] border border-black/10 bg-[#f3f2ed] p-4 sm:flex-row sm:items-center sm:justify-between"
-                                    >
+                                    </div>
 
-                                      <div>
+                                  </div>
 
-                                        <div className="flex flex-wrap items-center gap-2">
-
-                                          <Link
-                                            href={
-                                              unit
-                                                ? `/admin/inventario/${unit.id}`
-                                                : "#"
-                                            }
-                                            className="font-mono text-[14px] font-bold text-black/70 transition hover:text-[#ff5a1f]"
-                                          >
-                                            {unit?.asset_code ??
-                                              "Unità"}
-                                          </Link>
+                                </div>
 
 
-                                          <span className="h-2 w-2 rounded-full bg-[#168a50]" />
+                                {/* =================================================
+                                    ASSIGNED UNITS
+                                    ================================================= */}
 
+                                <div className="mt-6">
+
+                                  <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-black/35">
+                                    Unità assegnate
+                                  </div>
+
+
+                                  {assignments.length ===
+                                  0 ? (
+                                    <div className="mt-3 rounded-[15px] border border-dashed border-black/15 bg-[#f6f5f0] px-4 py-4 text-[13px] text-black/40">
+                                      Nessuna unità ancora
+                                      assegnata.
+                                    </div>
+                                  ) : (
+                                    <div className="mt-3 grid gap-2">
+
+                                      {assignments.map(
+                                        (
+                                          assignment
+                                        ) => {
+                                          const unit =
+                                            first(
+                                              assignment.product_units
+                                            );
+
+
+                                          return (
+                                            <div
+                                              key={
+                                                assignment.id
+                                              }
+                                              className="flex flex-col gap-3 rounded-[15px] border border-black/10 bg-[#f3f2ed] p-4 sm:flex-row sm:items-center sm:justify-between"
+                                            >
+
+                                              <div>
+
+                                                <div className="flex flex-wrap items-center gap-2">
+
+                                                  <Link
+                                                    href={
+                                                      unit
+                                                        ? `/admin/inventario/${unit.id}`
+                                                        : "#"
+                                                    }
+                                                    className="font-mono text-[14px] font-bold text-black/70 transition hover:text-[#ff5a1f]"
+                                                  >
+                                                    {unit?.asset_code ??
+                                                      "Unità"}
+                                                  </Link>
+
+
+                                                  <span className="h-2 w-2 rounded-full bg-[#168a50]" />
+
+                                                </div>
+
+
+                                                {unit?.serial_number && (
+                                                  <div className="mt-1 font-mono text-[11px] text-black/35">
+                                                    S/N{" "}
+                                                    {
+                                                      unit.serial_number
+                                                    }
+                                                  </div>
+                                                )}
+
+                                              </div>
+
+
+                                              {canOperate &&
+                                                reservation.status ===
+                                                  "confirmed" && (
+                                                <form
+                                                  action="/api/admin/assignments"
+                                                  method="post"
+                                                >
+
+                                                  <input
+                                                    type="hidden"
+                                                    name="action"
+                                                    value="remove"
+                                                  />
+
+                                                  <input
+                                                    type="hidden"
+                                                    name="reservation_id"
+                                                    value={
+                                                      reservation.id
+                                                    }
+                                                  />
+
+                                                  <input
+                                                    type="hidden"
+                                                    name="assignment_id"
+                                                    value={
+                                                      assignment.id
+                                                    }
+                                                  />
+
+
+                                                  <button
+                                                    type="submit"
+                                                    className="flex h-[42px] items-center justify-center rounded-[12px] border border-[#cf3d32]/15 bg-[#fff0ee] px-4 text-[12px] font-semibold text-[#b7352b] transition hover:bg-[#cf3d32] hover:text-white"
+                                                  >
+                                                    Rimuovi
+                                                  </button>
+
+                                                </form>
+                                              )}
+
+                                            </div>
+                                          );
+                                        }
+                                      )}
+
+                                    </div>
+                                  )}
+
+                                </div>
+
+
+                                {/* =================================================
+                                    ASSIGN NEW UNIT
+                                    ================================================= */}
+
+                                <div className="mt-5">
+
+                                  {!canAssign ? (
+                                    <div className="rounded-[15px] border border-[#d98a08]/20 bg-[#fff2d5] px-4 py-4 text-[13px] leading-6 text-[#8a650f]">
+                                      {!canOperate
+                                        ? "Modalità sola lettura: il tuo ruolo non può modificare le assegnazioni."
+                                        : reservation.status === "picked_up" ||
+                                            reservation.status === "returned"
+                                          ? "Assegnazioni bloccate: dopo il ritiro le unità fisiche non possono più essere modificate."
+                                          : "Conferma prima la richiesta per assegnare le unità fisiche."}
+                                    </div>
+                                  ) : remaining ===
+                                    0 ? (
+                                    <div className="rounded-[15px] border border-[#168a50]/15 bg-[#e9f6ee] px-4 py-4 text-[13px] font-semibold text-[#168a50]">
+                                      ✓ Tutte le unità
+                                      richieste sono state
+                                      assegnate.
+                                    </div>
+                                  ) : candidateUnits.length ===
+                                    0 ? (
+                                    <div className="rounded-[15px] border border-[#cf3d32]/15 bg-[#fff0ee] px-4 py-4">
+
+                                      <div className="text-[13px] font-semibold text-[#b7352b]">
+                                        Nessuna unità libera
+                                        nelle date richieste.
+                                      </div>
+
+                                      <div className="mt-1 text-[12px] leading-5 text-[#9d352c]/70">
+                                        Le unità operative
+                                        risultano già
+                                        impegnate oppure
+                                        bloccate nel periodo{" "}
+                                        {formatDate(
+                                          reservation.start_date
+                                        )}{" "}
+                                        →{" "}
+                                        {formatDate(
+                                          reservation.end_date
+                                        )}.
+                                      </div>
+
+                                    </div>
+                                  ) : (
+                                    <div>
+
+                                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+
+                                        <div className="text-[11px] font-bold uppercase tracking-[0.09em] text-black/35">
+                                          Assegna unità
                                         </div>
 
-
-                                        {unit?.serial_number && (
-                                          <div className="mt-1 font-mono text-[11px] text-black/35">
-                                            S/N{" "}
-                                            {
-                                              unit.serial_number
-                                            }
-                                          </div>
-                                        )}
+                                        <div className="rounded-full bg-[#e9f6ee] px-3 py-1.5 text-[10px] font-bold text-[#168a50]">
+                                          {
+                                            candidateUnits.length
+                                          }{" "}
+                                          {candidateUnits.length ===
+                                          1
+                                            ? "unità libera"
+                                            : "unità libere"}
+                                        </div>
 
                                       </div>
 
 
-                                      {canOperate &&
-                                        reservation.status ===
-                                          "confirmed" && (
-                                        <form
-                                          action="/api/admin/assignments"
-                                          method="post"
+                                      <form
+                                        action="/api/admin/assignments"
+                                        method="post"
+                                        className="grid gap-3 sm:grid-cols-[1fr_auto]"
+                                      >
+
+                                        <input
+                                          type="hidden"
+                                          name="action"
+                                          value="assign"
+                                        />
+
+                                        <input
+                                          type="hidden"
+                                          name="reservation_id"
+                                          value={
+                                            reservation.id
+                                          }
+                                        />
+
+                                        <input
+                                          type="hidden"
+                                          name="reservation_item_id"
+                                          value={
+                                            item.id
+                                          }
+                                        />
+
+
+                                        <select
+                                          name="product_unit_id"
+                                          required
+                                          defaultValue=""
+                                          className="h-[54px] min-w-0 rounded-[14px] border border-black/10 bg-[#f6f5f0] px-4 text-[14px] font-medium outline-none transition focus:border-[#ff5a1f]/45 focus:bg-white"
                                         >
 
-                                          <input
-                                            type="hidden"
-                                            name="action"
-                                            value="remove"
-                                          />
-
-                                          <input
-                                            type="hidden"
-                                            name="reservation_id"
-                                            value={
-                                              reservation.id
-                                            }
-                                          />
-
-                                          <input
-                                            type="hidden"
-                                            name="assignment_id"
-                                            value={
-                                              assignment.id
-                                            }
-                                          />
+                                          <option value="">
+                                            Seleziona unità ·{" "}
+                                            {
+                                              remaining
+                                            }{" "}
+                                            da assegnare
+                                          </option>
 
 
-                                          <button
-                                            type="submit"
-                                            className="flex h-[42px] items-center justify-center rounded-[12px] border border-[#cf3d32]/15 bg-[#fff0ee] px-4 text-[12px] font-semibold text-[#b7352b] transition hover:bg-[#cf3d32] hover:text-white"
-                                          >
-                                            Rimuovi
-                                          </button>
+                                          {candidateUnits.map(
+                                            (
+                                              unit
+                                            ) => (
+                                              <option
+                                                key={
+                                                  unit.id
+                                                }
+                                                value={
+                                                  unit.id
+                                                }
+                                              >
+                                                {
+                                                  unit.asset_code
+                                                }
+                                                {unit.serial_number
+                                                  ? ` · S/N ${unit.serial_number}`
+                                                  : ""}
+                                              </option>
+                                            )
+                                          )}
 
-                                        </form>
-                                      )}
+                                        </select>
+
+
+                                        <button
+                                          type="submit"
+                                          className="h-[54px] rounded-[14px] bg-[#181818] px-6 text-[14px] font-semibold text-white transition hover:bg-[#ff5a1f]"
+                                        >
+                                          Assegna
+                                        </button>
+
+                                      </form>
 
                                     </div>
-                                  );
-                                }
-                              )}
-
-                            </div>
-                          )}
-
-                        </div>
-
-
-                        {/* =================================================
-                            ASSIGN NEW UNIT
-                            ================================================= */}
-
-                        <div className="mt-5">
-
-                          {!canAssign ? (
-                            <div className="rounded-[15px] border border-[#d98a08]/20 bg-[#fff2d5] px-4 py-4 text-[13px] leading-6 text-[#8a650f]">
-                              {!canOperate
-                                ? "Modalità sola lettura: il tuo ruolo non può modificare le assegnazioni."
-                                : reservation.status === "picked_up" ||
-                                    reservation.status === "returned"
-                                  ? "Assegnazioni bloccate: dopo il ritiro le unità fisiche non possono più essere modificate."
-                                  : "Conferma prima la richiesta per assegnare le unità fisiche."}
-                            </div>
-                          ) : remaining ===
-                            0 ? (
-                            <div className="rounded-[15px] border border-[#168a50]/15 bg-[#e9f6ee] px-4 py-4 text-[13px] font-semibold text-[#168a50]">
-                              ✓ Tutte le unità
-                              richieste sono state
-                              assegnate.
-                            </div>
-                          ) : candidateUnits.length ===
-                            0 ? (
-                            <div className="rounded-[15px] border border-[#cf3d32]/15 bg-[#fff0ee] px-4 py-4">
-
-                              <div className="text-[13px] font-semibold text-[#b7352b]">
-                                Nessuna unità libera
-                                nelle date richieste.
-                              </div>
-
-                              <div className="mt-1 text-[12px] leading-5 text-[#9d352c]/70">
-                                Le unità operative
-                                risultano già
-                                impegnate oppure
-                                bloccate nel periodo{" "}
-                                {formatDate(
-                                  reservation.start_date
-                                )}{" "}
-                                →{" "}
-                                {formatDate(
-                                  reservation.end_date
-                                )}.
-                              </div>
-
-                            </div>
-                          ) : (
-                            <div>
-
-                              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-
-                                <div className="text-[11px] font-bold uppercase tracking-[0.09em] text-black/35">
-                                  Assegna unità
-                                </div>
-
-                                <div className="rounded-full bg-[#e9f6ee] px-3 py-1.5 text-[10px] font-bold text-[#168a50]">
-                                  {
-                                    candidateUnits.length
-                                  }{" "}
-                                  {candidateUnits.length ===
-                                  1
-                                    ? "unità libera"
-                                    : "unità libere"}
-                                </div>
-
-                              </div>
-
-
-                              <form
-                                action="/api/admin/assignments"
-                                method="post"
-                                className="grid gap-3 sm:grid-cols-[1fr_auto]"
-                              >
-
-                                <input
-                                  type="hidden"
-                                  name="action"
-                                  value="assign"
-                                />
-
-                                <input
-                                  type="hidden"
-                                  name="reservation_id"
-                                  value={
-                                    reservation.id
-                                  }
-                                />
-
-                                <input
-                                  type="hidden"
-                                  name="reservation_item_id"
-                                  value={
-                                    item.id
-                                  }
-                                />
-
-
-                                <select
-                                  name="product_unit_id"
-                                  required
-                                  defaultValue=""
-                                  className="h-[54px] min-w-0 rounded-[14px] border border-black/10 bg-[#f6f5f0] px-4 text-[14px] font-medium outline-none transition focus:border-[#ff5a1f]/45 focus:bg-white"
-                                >
-
-                                  <option value="">
-                                    Seleziona unità ·{" "}
-                                    {
-                                      remaining
-                                    }{" "}
-                                    da assegnare
-                                  </option>
-
-
-                                  {candidateUnits.map(
-                                    (
-                                      unit
-                                    ) => (
-                                      <option
-                                        key={
-                                          unit.id
-                                        }
-                                        value={
-                                          unit.id
-                                        }
-                                      >
-                                        {
-                                          unit.asset_code
-                                        }
-                                        {unit.serial_number
-                                          ? ` · S/N ${unit.serial_number}`
-                                          : ""}
-                                      </option>
-                                    )
                                   )}
 
-                                </select>
+                                </div>
+
+                              </article>
+                            );
+                          }
+                        )}
+
+                      </div>
 
 
-                                <button
-                                  type="submit"
-                                  className="h-[54px] rounded-[14px] bg-[#181818] px-6 text-[14px] font-semibold text-white transition hover:bg-[#ff5a1f]"
-                                >
-                                  Assegna
-                                </button>
+                      {/* TOTAL */}
 
-                              </form>
+                      <div className="flex flex-col gap-3 border-t border-black/10 bg-[#181818] p-6 text-white sm:flex-row sm:items-end sm:justify-between sm:p-7">
 
-                            </div>
-                          )}
+                        <div>
+
+                          <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff7b4a]">
+                            Totale stimato
+                          </div>
+
+                          <div className="mt-1 text-[13px] text-white/35">
+                            {
+                              totalQuantity
+                            }{" "}
+                            {totalQuantity ===
+                            1
+                              ? "pezzo"
+                              : "pezzi"}{" "}
+                            ·{" "}
+                            {
+                              days
+                            }{" "}
+                            {days ===
+                            1
+                              ? "giorno"
+                              : "giorni"}
+                          </div>
 
                         </div>
 
-                      </article>
-                    );
-                  }
-                )}
 
+                        <div className="text-[36px] font-semibold tracking-[-0.05em]">
+                          {
+                            formatMoney(
+                              total
+                            )
+                          }
+                        </div>
+
+                      </div>
+
+                    </section>
               </div>
+            </details>
 
-
-              {/* TOTAL */}
-
-              <div className="flex flex-col gap-3 border-t border-black/10 bg-[#181818] p-6 text-white sm:flex-row sm:items-end sm:justify-between sm:p-7">
-
+            {/* CONTROLLI DETTAGLIATI */}
+            <details
+              id="controlli-materiale"
+              className="group overflow-hidden rounded-[24px] border border-black/10 bg-white"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-[#fbfaf7] px-6 py-5 sm:px-7">
                 <div>
-
-                  <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff7b4a]">
-                    Totale stimato
+                  <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+                    Controlli dettagliati
                   </div>
-
-                  <div className="mt-1 text-[13px] text-white/35">
-                    {
-                      totalQuantity
-                    }{" "}
-                    {totalQuantity ===
-                    1
-                      ? "pezzo"
-                      : "pezzi"}{" "}
-                    ·{" "}
-                    {
-                      days
-                    }{" "}
-                    {days ===
-                    1
-                      ? "giorno"
-                      : "giorni"}
+                  <div className="mt-1 text-[20px] font-semibold tracking-[-0.03em]">
+                    Usali solo per anomalie, danni o note.
                   </div>
-
                 </div>
 
-
-                <div className="text-[36px] font-semibold tracking-[-0.05em]">
-                  {
-                    formatMoney(
-                      total
-                    )
-                  }
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f1f0ea] text-[18px] text-black/40 transition group-open:rotate-45">
+                  +
                 </div>
+              </summary>
 
+              <div className="space-y-5 border-t border-black/10 p-4 sm:p-5">
+                {(reservation.status ===
+                  "confirmed" ||
+                  reservation.status ===
+                    "picked_up" ||
+                  reservation.status ===
+                    "returned") &&
+                  checkoutChecklistUnits.length >
+                    0 && (
+                    <CheckoutChecklist
+                      units={
+                        checkoutChecklistUnits
+                      }
+                      editable={
+                        canOperate &&
+                        reservation.status ===
+                          "confirmed"
+                      }
+                    />
+                  )}
+
+                {(reservation.status ===
+                  "picked_up" ||
+                  reservation.status ===
+                    "returned") &&
+                  returnChecklistUnits.length >
+                    0 && (
+                    <ReturnChecklist
+                      units={
+                        returnChecklistUnits
+                      }
+                      editable={
+                        canOperate &&
+                        reservation.status ===
+                          "picked_up"
+                      }
+                    />
+                  )}
+
+                {reservation.status ===
+                  "requested" && (
+                  <div className="rounded-[16px] bg-[#f3f2ed] px-5 py-4 text-[13px] leading-6 text-black/45">
+                    I controlli di consegna saranno disponibili dopo la conferma della richiesta.
+                  </div>
+                )}
               </div>
-
-            </section>
-
-
-            {/* =================================================
-                CHECKOUT CHECKLIST
-                ================================================= */}
-
-            {(reservation.status ===
-              "confirmed" ||
-              reservation.status ===
-                "picked_up" ||
-              reservation.status ===
-                "returned") &&
-              checkoutChecklistUnits.length >
-                0 && (
-                <CheckoutChecklist
-                  units={
-                    checkoutChecklistUnits
-                  }
-                  editable={
-                    canOperate &&
-                    reservation.status ===
-                      "confirmed"
-                  }
-                />
-              )}
-
-
-            {/* =================================================
-                RETURN CHECKLIST
-                ================================================= */}
-
-            {(reservation.status ===
-              "picked_up" ||
-              reservation.status ===
-                "returned") &&
-              returnChecklistUnits.length >
-                0 && (
-                <ReturnChecklist
-                  units={
-                    returnChecklistUnits
-                  }
-                  editable={
-                    canOperate &&
-                    reservation.status ===
-                      "picked_up"
-                  }
-                />
-              )}
-
-
-            {/* NOTES */}
+            </details>
 
             <section className="rounded-[24px] border border-black/10 bg-white p-6 sm:p-7">
-
               <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
                 Note richiesta
               </div>
 
-              <p className="mt-4 whitespace-pre-wrap text-[15px] leading-7 text-black/55">
+              <p className="mt-3 whitespace-pre-wrap text-[14px] leading-7 text-black/50">
                 {reservation.notes ||
                   "Nessuna nota inserita dal cliente."}
               </p>
-
             </section>
-
           </div>
 
-
-          {/* =================================================
-              SIDEBAR
-              ================================================= */}
-
-          <aside className="space-y-5 xl:sticky xl:top-[110px]">
-
-            {/* STATUS */}
-
-            <section className="overflow-hidden rounded-[24px] bg-[#181818] text-white">
-
-              <div className="border-b border-white/10 p-6">
-
-                <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff7b4a]">
-                  Rental Control
-                </div>
-
-                <h2 className="mt-2 text-[27px] font-semibold tracking-[-0.04em]">
-                  Stato noleggio.
-                </h2>
-
-              </div>
-
-
-              {query.statusError && (
-                <div className="mx-6 mt-6 rounded-[15px] border border-[#cf3d32]/20 bg-[#fff0ee] px-4 py-4 text-[13px] font-medium leading-6 text-[#a9362d]">
-                  {
-                    query.statusError
-                  }
-                </div>
-              )}
-
-
-              {query.statusSuccess && (
-                <div className="mx-6 mt-6 rounded-[15px] border border-[#168a50]/15 bg-[#e9f6ee] px-4 py-4 text-[13px] font-medium leading-6 text-[#168a50]">
-                  ✓{" "}
-                  {
-                    query.statusSuccess
-                  }
-                </div>
-              )}
-
-
-              {canOperate ? (
-                <RequestStatusForm
-                  requestId={
-                    reservation.id
-                  }
-                  currentStatus={
-                    reservation.status
-                  }
-                />
-              ) : (
-                <div className="m-6 rounded-[15px] border border-white/10 bg-white/[0.06] px-4 py-4 text-[13px] leading-6 text-white/55">
-                  Modalità sola lettura.
-                  Il ruolo Viewer non può
-                  modificare lo stato del
-                  noleggio.
-                </div>
-              )}
-            </section>
-
-
-            {/* EQUIPMENT STATUS */}
-
+          <aside className="space-y-5 xl:sticky xl:top-[100px]">
             <section className="rounded-[24px] border border-black/10 bg-white p-6">
-
-              <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
-                Equipment status
+              <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+                Riepilogo
               </div>
-
-
-              <div className="mt-4 flex items-end justify-between gap-4">
-
-                <div>
-
-                  <div className="text-[35px] font-semibold leading-none tracking-[-0.05em]">
-                    {
-                      totalAssigned
-                    }
-                    /
-                    {
-                      totalQuantity
-                    }
-                  </div>
-
-                  <div className="mt-2 text-[12px] text-black/40">
-                    unità assegnate
-                  </div>
-
-                </div>
-
-
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-full text-[18px] font-bold ${
-                    allAssigned
-                      ? "bg-[#e9f6ee] text-[#168a50]"
-                      : "bg-[#fff2d5] text-[#aa6b08]"
-                  }`}
-                >
-                  {allAssigned
-                    ? "✓"
-                    : "!"}
-                </div>
-
-              </div>
-
-
-              <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#ecebe6]">
-
-                <div
-                  className={`h-full rounded-full ${
-                    allAssigned
-                      ? "bg-[#168a50]"
-                      : "bg-[#ff5a1f]"
-                  }`}
-                  style={{
-                    width:
-                      totalQuantity >
-                      0
-                        ? `${Math.min(
-                            100,
-                            (
-                              totalAssigned /
-                              totalQuantity
-                            ) *
-                              100
-                          )}%`
-                        : "0%",
-                  }}
-                />
-
-              </div>
-
-            </section>
-
-
-            {/* INFO */}
-
-            <section className="rounded-[24px] border border-black/10 bg-white p-6">
-
-              <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-black/35">
-                Informazioni
-              </div>
-
 
               <div className="mt-5 space-y-4">
-
                 <InfoRow
                   label="Riferimento"
                   value={
@@ -2533,29 +2288,55 @@ export default async function AdminRequestPage({
 
                 <InfoRow
                   label="Ricevuta"
-                  value={
-                    formatDateTime(
-                      reservation.created_at
-                    )
-                  }
+                  value={formatDateTime(
+                    reservation.created_at
+                  )}
                 />
 
                 <InfoRow
-                  label="Durata"
-                  value={`${days} ${
-                    days ===
-                    1
-                      ? "giorno"
-                      : "giorni"
-                  }`}
+                  label="Periodo"
+                  value={`${formatDate(reservation.start_date)} → ${formatDate(reservation.end_date)}`}
                 />
 
-              </div>
+                <InfoRow
+                  label="Attrezzatura"
+                  value={`${totalQuantity} ${totalQuantity === 1 ? "pezzo" : "pezzi"}`}
+                />
 
+                <InfoRow
+                  label="Unità assegnate"
+                  value={`${totalAssigned}/${totalQuantity}`}
+                />
+              </div>
             </section>
 
+            <section className="rounded-[24px] bg-[#181818] p-6 text-white">
+              <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff7b4a]">
+                Contatto cliente
+              </div>
 
-            {/* DELETE */}
+              <div className="mt-4 text-[18px] font-semibold">
+                {customer?.name ?? "Cliente"}
+              </div>
+
+              {customer?.email && (
+                <a
+                  href={`mailto:${customer.email}`}
+                  className="mt-3 block break-all text-[13px] text-white/55 transition hover:text-[#ff7b4a]"
+                >
+                  {customer.email}
+                </a>
+              )}
+
+              {customer?.phone && (
+                <a
+                  href={`tel:${customer.phone}`}
+                  className="mt-2 block text-[13px] text-white/55 transition hover:text-[#ff7b4a]"
+                >
+                  {customer.phone}
+                </a>
+              )}
+            </section>
 
             {canDelete && (
               <DeleteRequestButton
@@ -2567,13 +2348,35 @@ export default async function AdminRequestPage({
                 }
               />
             )}
-
           </aside>
-
         </div>
-
       </div>
     </main>
+  );
+}
+
+
+/* =========================================================
+   COMPACT STAT
+   ========================================================= */
+
+function CompactStat({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-[118px] rounded-[16px] bg-[#f3f2ed] px-4 py-3">
+      <div className="text-[9px] font-bold uppercase tracking-[0.09em] text-black/30">
+        {label}
+      </div>
+
+      <div className="mt-1 text-[13px] font-semibold text-black/65">
+        {value}
+      </div>
+    </div>
   );
 }
 
@@ -2600,117 +2403,6 @@ function StatusBadge({
         )
       }
     </span>
-  );
-}
-
-
-/* =========================================================
-   HERO STAT
-   ========================================================= */
-
-function HeroStat({
-  value,
-  label,
-  success = false,
-}: {
-  value:
-    string
-    | number;
-
-  label:
-    string;
-
-  success?:
-    boolean;
-}) {
-  return (
-    <div className="rounded-[16px] border border-white/10 bg-white/[0.06] p-4">
-
-      <div
-        className={`text-[27px] font-semibold tracking-[-0.045em] ${
-          success
-            ? "text-[#6bd49c]"
-            : "text-white"
-        }`}
-      >
-        {
-          value
-        }
-      </div>
-
-      <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-white/35">
-        {
-          label
-        }
-      </div>
-
-    </div>
-  );
-}
-
-
-/* =========================================================
-   WORKFLOW
-   ========================================================= */
-
-function WorkflowStep({
-  number,
-  label,
-  active,
-  complete,
-}: {
-  number: string;
-  label: string;
-  active: boolean;
-  complete: boolean;
-}) {
-  return (
-    <div className="border-b border-black/10 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
-
-      <div className="flex items-center gap-3">
-
-        <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-            complete
-              ? "bg-[#e9f6ee] text-[#168a50]"
-              : active
-                ? "bg-[#ff5a1f] text-white"
-                : "bg-[#f1f0ea] text-black/35"
-          }`}
-        >
-          {complete
-            ? "✓"
-            : number}
-        </div>
-
-
-        <div>
-
-          <div
-            className={`text-[14px] font-semibold ${
-              active
-                ? "text-[#ff5a1f]"
-                : "text-black/60"
-            }`}
-          >
-            {
-              label
-            }
-          </div>
-
-          <div className="mt-0.5 text-[11px] text-black/30">
-            {complete
-              ? "Completato"
-              : active
-                ? "Stato attuale"
-                : "Successivo"}
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
   );
 }
 
