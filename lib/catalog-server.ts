@@ -107,14 +107,15 @@ function getCategory(
 
 function normalizeCategorySlug(
   value: string | null | undefined
-) {
+): Product["category"] {
   const slug =
     String(value ?? "")
       .trim()
       .toLowerCase();
 
-  return slug || "accessori";
+  return (slug || "accessori") as Product["category"];
 }
+
 
 function normalizeAttributes(
   value:
