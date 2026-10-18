@@ -1,6 +1,11 @@
-import type {
-  ReactNode,
+import {
+  cache,
+  type ReactNode,
 } from "react";
+
+import type {
+  Metadata,
+} from "next";
 
 import Link from "next/link";
 
@@ -21,6 +26,160 @@ export const dynamic =
   "force-dynamic";
 
 
+const SITE_URL =
+  "https://lapgear.it";
+
+
+const getProduct =
+  cache(
+    async (
+      slug: string
+    ) =>
+      getCatalogProduct(
+        slug
+      )
+  );
+
+
+function getAbsoluteUrl(
+  value:
+    | string
+    | null
+    | undefined
+) {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    return new URL(
+      value,
+      SITE_URL
+    ).toString();
+  } catch {
+    return undefined;
+  }
+}
+
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{
+    slug: string;
+  }>;
+}): Promise<Metadata> {
+  const {
+    slug,
+  } =
+    await params;
+
+  const product =
+    await getProduct(
+      slug
+    );
+
+  if (!product) {
+    return {
+      title:
+        "Prodotto non disponibile",
+
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const url =
+    `${SITE_URL}/prodotto/${product.slug}`;
+
+  const description =
+    (
+      product.shortDescription ||
+      product.description ||
+      `Noleggia ${product.name} a Roma con LAP GEAR. Attrezzatura professionale per produzioni video, eventi e shooting.`
+    )
+      .trim()
+      .slice(
+        0,
+        160
+      );
+
+  const seoTitle =
+    `${product.name} a noleggio a Roma`;
+
+  const imageUrl =
+    getAbsoluteUrl(
+      product.image
+    );
+
+  return {
+    title:
+      seoTitle,
+
+    description,
+
+    alternates: {
+      canonical:
+        url,
+    },
+
+    openGraph: {
+      title:
+        `${seoTitle} | LAP GEAR`,
+
+      description,
+
+      url,
+
+      siteName:
+        "LAP GEAR",
+
+      type:
+        "website",
+
+      images:
+        imageUrl
+          ? [
+              {
+                url:
+                  imageUrl,
+
+                alt:
+                  product.name,
+              },
+            ]
+          : undefined,
+    },
+
+    twitter: {
+      card:
+        imageUrl
+          ? "summary_large_image"
+          : "summary",
+
+      title:
+        `${seoTitle} | LAP GEAR`,
+
+      description,
+
+      images:
+        imageUrl
+          ? [
+              imageUrl,
+            ]
+          : undefined,
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
+
 export default async function ProductPage({
   params,
 }: {
@@ -34,7 +193,7 @@ export default async function ProductPage({
     await params;
 
   const product =
-    await getCatalogProduct(
+    await getProduct(
       slug
     );
 
@@ -52,6 +211,150 @@ export default async function ProductPage({
       product.priceDay ??
         0
     );
+
+  const productUrl =
+    `${SITE_URL}/prodotto/${product.slug}`;
+
+  const imageUrl =
+    getAbsoluteUrl(
+      product.image
+    );
+
+  const structuredData = {
+    "@context":
+      "https://schema.org",
+
+    "@graph": [
+      {
+        "@type":
+          "Product",
+
+        "@id":
+          `${productUrl}#product`,
+
+        name:
+          product.name,
+
+        url:
+          productUrl,
+
+        description:
+          product.shortDescription ||
+          product.description ||
+          undefined,
+
+        image:
+          imageUrl
+            ? [
+                imageUrl,
+              ]
+            : undefined,
+
+        category:
+          product.categoryLabel,
+
+        brand:
+          product.brand
+            ? {
+                "@type":
+                  "Brand",
+
+                name:
+                  product.brand,
+              }
+            : undefined,
+
+        offers: {
+          "@type":
+            "Offer",
+
+          url:
+            productUrl,
+
+          priceCurrency:
+            "EUR",
+
+          price:
+            price.toFixed(
+              2
+            ),
+
+          businessFunction:
+            "http://purl.org/goodrelations/v1#LeaseOut",
+
+          priceSpecification: {
+            "@type":
+              "UnitPriceSpecification",
+
+            price:
+              price.toFixed(
+                2
+              ),
+
+            priceCurrency:
+              "EUR",
+
+            unitCode:
+              "DAY",
+
+            unitText:
+              "giorno",
+          },
+        },
+      },
+
+      {
+        "@type":
+          "BreadcrumbList",
+
+        itemListElement: [
+          {
+            "@type":
+              "ListItem",
+
+            position:
+              1,
+
+            name:
+              "Catalogo",
+
+            item:
+              `${SITE_URL}/catalogo`,
+          },
+
+          {
+            "@type":
+              "ListItem",
+
+            position:
+              2,
+
+            name:
+              product.categoryLabel,
+
+            item:
+              `${SITE_URL}/catalogo?categoria=${encodeURIComponent(
+                product.category
+              )}`,
+          },
+
+          {
+            "@type":
+              "ListItem",
+
+            position:
+              3,
+
+            name:
+              product.name,
+
+            item:
+              productUrl,
+          },
+        ],
+      },
+    ],
+  };
 
   const attributes =
     Object.entries(
@@ -76,6 +379,19 @@ export default async function ProductPage({
 
   return (
     <main className="min-h-screen bg-[#ebeae4] text-[#111111]">
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            JSON.stringify(
+              structuredData
+            ).replace(
+              /</g,
+              "\\u003c"
+            ),
+        }}
+      />
 
       {/* =====================================================
           BREADCRUMB
