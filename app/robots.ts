@@ -1,47 +1,16 @@
-import type {
-  MetadataRoute,
-} from "next";
+import type { MetadataRoute } from "next";
 
-
-function getSiteUrl() {
-  return (
-    process.env.SITE_URL ??
-    "http://localhost:3000"
-  ).replace(
-    /\/+$/,
-    ""
-  );
-}
-
-
-export default function robots():
-  MetadataRoute.Robots {
-
-  const siteUrl =
-    getSiteUrl();
-
-
+export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [
-      {
-        userAgent:
-          "*",
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: [
+        "/admin/",
+        "/api/",
+      ],
+    },
 
-        allow:
-          "/",
-
-        disallow: [
-          "/admin",
-          "/api",
-          "/richiesta",
-        ],
-      },
-    ],
-
-    sitemap:
-      `${siteUrl}/sitemap.xml`,
-
-    host:
-      siteUrl,
+    sitemap: "https://lapgear.it/sitemap.xml",
   };
 }
