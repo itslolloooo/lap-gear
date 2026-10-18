@@ -8,7 +8,7 @@ import { LegalFooter } from "@/components/LegalFooter";
 
 
 export const metadata: Metadata = {
-  title: "LAP equipment · Noleggio attrezzatura foto video live",
+  title: "LAP Gear · Noleggio attrezzatura foto video live",
   description: "Noleggio attrezzatura professionale per foto, video, audio e produzioni live."
 };
 
@@ -19,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <RentalProvider>
           <Header />
           {children}
+          <LegalFooter />
           <Footer />
         </RentalProvider>
       </body>

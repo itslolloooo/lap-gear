@@ -66,10 +66,6 @@ import {
 
 
 
-  rentalPrice,
-
-
-
 } from "@/lib/pricing";
 
 
@@ -378,7 +374,7 @@ export default function RentalPage() {
 
 
 
-            rentalPrice(
+            Number(
 
 
 
@@ -386,15 +382,15 @@ export default function RentalPage() {
 
 
 
-                .priceDay,
-
-
-
-              days
+                .priceDay
 
 
 
             ) *
+
+
+
+              days *
 
 
 
