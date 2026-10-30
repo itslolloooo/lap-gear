@@ -1397,6 +1397,129 @@ export default async function AdminRequestPage({
           </div>
         </section>
 
+        <section className="mt-6 overflow-hidden rounded-[26px] border border-black/10 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-col gap-4 border-b border-black/10 bg-[#fffaf6] px-6 py-5 sm:flex-row sm:items-end sm:justify-between sm:px-7">
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
+                Materiale richiesto
+              </div>
+
+              <h2 className="mt-1 text-[28px] font-semibold tracking-[-0.04em]">
+                Cosa vuole noleggiare il cliente.
+              </h2>
+
+              <p className="mt-2 text-[13px] leading-6 text-black/45">
+                Questa è la base del preventivo: quantità richieste, tariffa giornaliera e subtotale sul periodo selezionato.
+              </p>
+            </div>
+
+            <div className="rounded-[16px] bg-[#181818] px-5 py-4 text-white">
+              <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-white/35">
+                Stima catalogo
+              </div>
+
+              <div className="mt-1 text-[26px] font-semibold tracking-[-0.04em] text-[#ff7b4a]">
+                {formatMoney(
+                  total
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="divide-y divide-black/10">
+            {items.map(
+              (
+                item
+              ) => {
+                const product =
+                  first(
+                    item.products
+                  );
+
+                const lineTotal =
+                  Number(
+                    item.price_day
+                  ) *
+                  item.quantity *
+                  days;
+
+                return (
+                  <div
+                    key={
+                      item.id
+                    }
+                    className="grid gap-4 px-6 py-5 sm:px-7 lg:grid-cols-[minmax(0,1fr)_120px_140px_160px] lg:items-center"
+                  >
+                    <div>
+                      <div className="text-[18px] font-semibold tracking-[-0.025em]">
+                        {product?.name ??
+                          "Prodotto"}
+                      </div>
+
+                      <div className="mt-1 text-[12px] text-black/35">
+                        {days}{" "}
+                        {days ===
+                        1
+                          ? "giorno"
+                          : "giorni"}{" "}
+                        di noleggio
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-black/30">
+                        Quantità
+                      </div>
+
+                      <div className="mt-1 text-[16px] font-semibold">
+                        {item.quantity}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-black/30">
+                        Prezzo / giorno
+                      </div>
+
+                      <div className="mt-1 text-[16px] font-semibold">
+                        {formatMoney(
+                          Number(
+                            item.price_day
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="lg:text-right">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-black/30">
+                        Subtotale
+                      </div>
+
+                      <div className="mt-1 text-[18px] font-semibold text-[#ff5a1f]">
+                        {formatMoney(
+                          lineTotal
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            )}
+          </div>
+
+          {reservation.notes && (
+            <div className="border-t border-black/10 bg-[#f6f5f0] px-6 py-5 sm:px-7">
+              <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
+                Note del cliente
+              </div>
+
+              <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6 text-black/55">
+                {reservation.notes}
+              </p>
+            </div>
+          )}
+        </section>
+
         <div className="mt-6">
           <RentalWorkflowPanel
             requestId={
