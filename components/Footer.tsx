@@ -82,6 +82,21 @@ function Footer() {
               />
 
               <FooterLink
+                href="/noleggio-attrezzatura-video-roma"
+                label="Noleggio video Roma"
+              />
+
+              <FooterLink
+                href="/noleggio-attrezzatura-video-roma-est"
+                label="Noleggio video Roma Est"
+              />
+
+              <FooterLink
+                href="/noleggio-attrezzatura-video-palestrina"
+                label="Noleggio video Palestrina"
+              />
+
+              <FooterLink
                 href="/termini-noleggio"
                 label="Termini di noleggio"
               />
