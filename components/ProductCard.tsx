@@ -9,8 +9,10 @@ import type { Product } from "@/lib/types";
 
 export function ProductCard({
   product,
+  compact = false,
 }: {
   product: Product;
+  compact?: boolean;
 }) {
   const { add } =
     useRental();
@@ -34,7 +36,7 @@ export function ProductCard({
   }
 
   return (
-    <article className="group relative flex min-h-full flex-col overflow-hidden rounded-[27px] border border-black/10 bg-white transition duration-300 hover:-translate-y-1 hover:border-[#ff5a1f]/30 hover:shadow-[0_24px_65px_rgba(0,0,0,0.08)]">
+    <article className={`group relative flex min-h-full flex-col overflow-hidden border border-black/10 bg-white transition duration-300 hover:-translate-y-1 hover:border-[#ff5a1f]/30 hover:shadow-[0_24px_65px_rgba(0,0,0,0.08)] ${compact ? "rounded-[22px]" : "rounded-[27px]"}`}>
       <div className="h-[5px] w-full bg-[#181818] transition duration-300 group-hover:bg-[#ff5a1f]" />
 
       {/* IMAGE */}
@@ -43,13 +45,13 @@ export function ProductCard({
         href={`/prodotto/${product.slug}`}
         className="relative block overflow-hidden bg-[#f0efe9]"
       >
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className={`relative overflow-hidden ${compact ? "aspect-[16/11]" : "aspect-[4/3]"}`}>
           {product.image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={product.image}
               alt={product.name}
-              className="h-full w-full object-contain p-7 transition duration-500 group-hover:scale-[1.045]"
+              className={`h-full w-full object-contain transition duration-500 group-hover:scale-[1.045] ${compact ? "p-5" : "p-7"}`}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
@@ -65,17 +67,17 @@ export function ProductCard({
             </div>
           )}
 
-          <div className="absolute left-5 top-5 rounded-full bg-white px-3.5 py-2 text-[12px] font-bold uppercase tracking-[0.08em] text-black/55 shadow-[0_5px_16px_rgba(0,0,0,0.06)]">
+          <div className={`absolute rounded-full bg-white font-bold uppercase tracking-[0.08em] text-black/55 shadow-[0_5px_16px_rgba(0,0,0,0.06)] ${compact ? "left-3 top-3 px-2.5 py-1.5 text-[10px]" : "left-5 top-5 px-3.5 py-2 text-[12px]"}`}>
             {product.categoryLabel}
           </div>
 
           {product.brand && (
-            <div className="absolute right-5 top-5 rounded-full bg-[#181818] px-3.5 py-2 text-[12px] font-bold uppercase tracking-[0.08em] text-white">
+            <div className={`absolute rounded-full bg-[#181818] font-bold uppercase tracking-[0.08em] text-white ${compact ? "right-3 top-3 px-2.5 py-1.5 text-[10px]" : "right-5 top-5 px-3.5 py-2 text-[12px]"}`}>
               {product.brand}
             </div>
           )}
 
-          <div className="absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-full bg-white text-[19px] text-[#181818] shadow-[0_5px_18px_rgba(0,0,0,0.08)] transition duration-300 group-hover:bg-[#ff5a1f] group-hover:text-white">
+          <div className={`absolute flex items-center justify-center rounded-full bg-white text-[#181818] shadow-[0_5px_18px_rgba(0,0,0,0.08)] transition duration-300 group-hover:bg-[#ff5a1f] group-hover:text-white ${compact ? "bottom-3 right-3 h-9 w-9 text-[16px]" : "bottom-5 right-5 h-11 w-11 text-[19px]"}`}>
             ↗
           </div>
         </div>
@@ -83,7 +85,7 @@ export function ProductCard({
 
       {/* BODY */}
 
-      <div className="flex flex-1 flex-col p-6 sm:p-7">
+      <div className={`flex flex-1 flex-col ${compact ? "p-5" : "p-6 sm:p-7"}`}>
         {product.brand && (
           <div className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
             {product.brand}
@@ -95,14 +97,14 @@ export function ProductCard({
             <Link
               href={`/prodotto/${product.slug}`}
             >
-              <h3 className="text-[29px] font-semibold leading-[1.03] tracking-[-0.048em] text-[#151515] transition group-hover:text-[#ff5a1f] sm:text-[31px]">
+              <h3 className={`font-semibold leading-[1.03] tracking-[-0.048em] text-[#151515] transition group-hover:text-[#ff5a1f] ${compact ? "text-[21px]" : "text-[29px] sm:text-[31px]"}`}>
                 {product.name}
               </h3>
             </Link>
           </div>
 
           <div className="shrink-0 text-right">
-            <div className="text-[26px] font-semibold leading-none tracking-[-0.045em] text-[#151515]">
+            <div className={`font-semibold leading-none tracking-[-0.045em] text-[#151515] ${compact ? "text-[21px]" : "text-[26px]"}`}>
               €{price.toFixed(0)}
             </div>
 
@@ -114,7 +116,7 @@ export function ProductCard({
 
         {/* AVAILABILITY */}
 
-        <div className="mt-6 flex items-start gap-3 rounded-[15px] bg-[#f3f2ed] px-4 py-3.5">
+        <div className={`items-start gap-3 rounded-[15px] bg-[#f3f2ed] px-4 py-3.5 ${compact ? "mt-4 hidden" : "mt-6 flex"}`}>
           <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#168a50]" />
 
           <div>
@@ -130,10 +132,10 @@ export function ProductCard({
 
         {/* ACTIONS */}
 
-        <div className="mt-auto grid grid-cols-[1fr_auto] gap-3 border-t border-black/10 pt-6">
+        <div className={`mt-auto grid grid-cols-[1fr_auto] gap-3 border-t border-black/10 ${compact ? "pt-4" : "pt-6"}`}>
           <Link
             href={`/prodotto/${product.slug}`}
-            className="flex h-[56px] items-center justify-center rounded-[16px] border border-black/10 bg-[#f1f0ea] px-5 text-[15px] font-semibold text-black/65 transition hover:border-black/25 hover:bg-white hover:text-black"
+            className={`flex items-center justify-center rounded-[14px] border border-black/10 bg-[#f1f0ea] font-semibold text-black/65 transition hover:border-black/25 hover:bg-white hover:text-black ${compact ? "h-[48px] px-4 text-[13px]" : "h-[56px] px-5 text-[15px]"}`}
           >
             Dettagli
           </Link>
@@ -143,14 +145,12 @@ export function ProductCard({
             onClick={addToKit}
             className={`
               flex
-              h-[56px]
-              min-w-[116px]
+              ${compact ? "h-[48px] min-w-[92px]" : "h-[56px] min-w-[116px]"}
               items-center
               justify-center
               gap-2
               rounded-[16px]
-              px-5
-              text-[15px]
+              ${compact ? "px-4 text-[13px]" : "px-5 text-[15px]"}
               font-semibold
               transition
               duration-200
