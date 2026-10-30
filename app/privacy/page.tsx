@@ -5,6 +5,9 @@ import { getBusinessInfo } from "@/lib/business-info";
 export const metadata: Metadata = {
   title: "Privacy Policy | LAP GEAR",
   description: "Informativa sul trattamento dei dati personali raccolti da LAP GEAR durante la fase di lancio.",
+  alternates: {
+    canonical: "https://lapgear.it/privacy",
+  },
 };
 
 const LAST_UPDATED = "12 ottobre 2026";
