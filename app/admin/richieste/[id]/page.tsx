@@ -19,6 +19,10 @@ import {
 } from "@/components/admin/QuotePanel";
 
 import {
+  PaymentPanel,
+} from "@/components/admin/PaymentPanel";
+
+import {
   notFound,
   redirect,
 } from "next/navigation";
@@ -1439,6 +1443,19 @@ export default async function AdminRequestPage({
                 ✓ {query.statusSuccess}
               </div>
             )}
+
+            <PaymentPanel
+              reservationId={
+                reservation.id
+              }
+              orderTotal={
+                quotedTotal ??
+                total
+              }
+              canEdit={
+                canOperate
+              }
+            />
 
             {/* PREVENTIVO */}
             <details
