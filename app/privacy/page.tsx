@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
 };
 
-const LAST_UPDATED = "12 ottobre 2026";
+const LAST_UPDATED = "30 ottobre 2026";
 
 export default function PrivacyPage() {
   const business = getBusinessInfo();
@@ -105,10 +105,15 @@ export default function PrivacyPage() {
 
           <Section number="07" title="Cookie e strumenti di tracciamento">
             <p>
-              Se il sito utilizza esclusivamente cookie o tecnologie strettamente necessarie al suo
-              funzionamento, non viene richiesto un consenso preventivo per tali strumenti. Eventuali
-              strumenti di profilazione o tracciamento non necessario dovranno invece essere attivati
-              soltanto dopo una scelta valida dell'utente.
+              LAP GEAR utilizza Google Analytics 4 per misurare in forma aggregata l'utilizzo del sito,
+              ad esempio visualizzazioni di pagina, consultazione dei prodotti, aggiunte al kit e invio
+              delle richieste. Google Analytics viene caricato soltanto dopo che l'utente ha espresso
+              il consenso tramite il banner dedicato.
+            </p>
+            <p>
+              Se il consenso viene rifiutato, il tag Analytics non viene utilizzato per la misurazione.
+              La scelta viene memorizzata localmente nel browser per evitare di richiederla a ogni pagina.
+              Restano possibili tecnologie strettamente necessarie al funzionamento e alla sicurezza del sito.
             </p>
           </Section>
 
