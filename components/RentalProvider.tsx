@@ -239,12 +239,6 @@ export function RentalProvider({
       null
     );
 
-  const [
-    gaReady,
-    setGaReady,
-  ] =
-    useState(false);
-
   useEffect(() => {
     try {
       const stored =
@@ -295,6 +289,8 @@ export function RentalProvider({
         "granted"
       );
 
+      configureGoogleAnalytics();
+
       setAnalyticsConsent(
         "granted"
       );
@@ -331,8 +327,7 @@ export function RentalProvider({
   useEffect(() => {
     if (
       analyticsConsent !==
-        "granted" ||
-      !gaReady
+        "granted"
     ) {
       return;
     }
@@ -351,7 +346,6 @@ export function RentalProvider({
   }, [
     analyticsConsent,
     pathname,
-    gaReady,
   ]);
 
   function acceptAnalytics() {
@@ -363,6 +357,8 @@ export function RentalProvider({
     setGoogleConsent(
       "granted"
     );
+
+    configureGoogleAnalytics();
 
     setAnalyticsConsent(
       "granted"
@@ -528,10 +524,6 @@ export function RentalProvider({
           id="lapgear-ga4"
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"
-          onReady={() => {
-            configureGoogleAnalytics();
-            setGaReady(true);
-          }}
         />
       )}
 
