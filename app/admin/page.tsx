@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import AdminLogoutButton from "@/components/AdminLogoutButton";
+import { MaterialStatsServer } from "@/components/admin/MaterialStatsServer";
 
 import {
   requireAdminAccess,
@@ -266,6 +267,8 @@ export default async function AdminPage() {
             )}
           </div>
         </section>
+
+        <MaterialStatsServer />
 
         {/* =====================================================
             WORKFLOW
