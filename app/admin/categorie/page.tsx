@@ -76,12 +76,6 @@ export default async function AdminCategoriesPage() {
         true
       )
       .order(
-        "position",
-        {
-          ascending: true,
-        }
-      )
-      .order(
         "name",
         {
           ascending: true,
@@ -162,7 +156,7 @@ export default async function AdminCategoriesPage() {
                 href="/admin/prodotti"
                 className="mt-8 flex h-[52px] items-center justify-center rounded-[15px] bg-white px-5 text-[14px] font-semibold text-[#181818] transition hover:bg-[#ff5a1f] hover:text-white"
               >
-                ← Torna ai prodotti
+                Vai ai prodotti
               </Link>
             </div>
           </div>
