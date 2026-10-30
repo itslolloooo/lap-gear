@@ -1,4 +1,8 @@
-import { MaterialStats, type MaterialStatRow } from "@/components/admin/MaterialStats";
+import {
+  MaterialStats,
+  type MaterialMonthlyStat,
+  type MaterialStatRow,
+} from "@/components/admin/MaterialStats";
 import { getServerSupabase } from "@/lib/supabase-server";
 
 type Reservation = {
@@ -95,11 +99,77 @@ export async function MaterialStatsServer() {
     if (row) row.requestCount = ids.size;
   }
 
+  const monthMap =
+    new Map<
+      string,
+      {
+        requestIds: Set<string>;
+        grossValue: number;
+      }
+    >();
+
+  for (const rawItem of (itemsResult.data ?? []) as unknown as Item[]) {
+    const reservation = Array.isArray(rawItem.reservations)
+      ? rawItem.reservations[0] ?? null
+      : rawItem.reservations;
+
+    if (!reservation || reservation.status === "cancelled") continue;
+
+    const startDate = new Date(`${reservation.start_date}T00:00:00`);
+    const monthKey = `${startDate.getFullYear()}-${String(
+      startDate.getMonth() + 1
+    ).padStart(2, "0")}`;
+
+    const current =
+      monthMap.get(monthKey) ?? {
+        requestIds: new Set<string>(),
+        grossValue: 0,
+      };
+
+    const qty = Number(rawItem.quantity ?? 0);
+    const price = Number(rawItem.price_day ?? 0);
+    const endDate = new Date(`${reservation.end_date}T00:00:00`);
+    const days = Math.max(
+      1,
+      Math.floor((endDate.getTime() - startDate.getTime()) / 86400000) + 1
+    );
+
+    current.requestIds.add(String(reservation.id));
+    current.grossValue += qty * price * days;
+    monthMap.set(monthKey, current);
+  }
+
+  const monthFormatter =
+    new Intl.DateTimeFormat("it-IT", {
+      month: "short",
+      year: "2-digit",
+    });
+
+  const monthly:
+    MaterialMonthlyStat[] =
+    Array.from(monthMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-12)
+      .map(([month, value]) => {
+        const [year, monthNumber] =
+          month.split("-").map(Number);
+
+        return {
+          month,
+          label: monthFormatter.format(
+            new Date(year, monthNumber - 1, 1)
+          ),
+          requestCount: value.requestIds.size,
+          grossValue: value.grossValue,
+        };
+      });
+
   return (
     <MaterialStats
       rows={Array.from(rows.values()).sort((a, b) =>
         a.name.localeCompare(b.name, "it", { sensitivity: "base" })
       )}
+      monthly={monthly}
     />
   );
 }
