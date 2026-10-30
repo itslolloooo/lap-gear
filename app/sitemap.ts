@@ -26,11 +26,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/richiesta`,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
       url: `${baseUrl}/privacy`,
       changeFrequency: "yearly",
       priority: 0.2,
@@ -39,6 +34,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/termini-noleggio`,
       changeFrequency: "monthly",
       priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/recesso`,
+      changeFrequency: "yearly",
+      priority: 0.2,
     },
     {
       url: `${baseUrl}/note-legali`,
