@@ -50,6 +50,9 @@ type Props = {
 
   initialData?:
     InventoryFormData;
+
+  initialProductId?:
+    number | null;
 };
 
 
@@ -58,6 +61,7 @@ export function InventoryUnitForm({
   action,
   submitLabel,
   initialData,
+  initialProductId = null,
 }: Props) {
   const [
     productId,
@@ -68,7 +72,11 @@ export function InventoryUnitForm({
         ? String(
             initialData.product_id
           )
-        : ""
+        : initialProductId
+          ? String(
+              initialProductId
+            )
+          : ""
     );
 
   const [
@@ -92,6 +100,9 @@ export function InventoryUnitForm({
         productId
     ) ??
     null;
+
+  const isCreateMode =
+    !initialData;
 
 
   return (
@@ -173,44 +184,86 @@ export function InventoryUnitForm({
         <FormPanel
           number="02"
           eyebrow="Asset"
-          title="Identificazione"
-          description="Asset code e seriale identificano il singolo pezzo fisico."
+          title={
+            isCreateMode
+              ? "Unità da aggiungere"
+              : "Identificazione"
+          }
+          description={
+            isCreateMode
+              ? "Scegli la quantità. I codici asset vengono generati automaticamente in sequenza."
+              : "Asset code e seriale identificano il singolo pezzo fisico."
+          }
         >
-          <div className="grid gap-5 sm:grid-cols-2">
-
-            <Field
-              label="Asset code"
-              hint="Univoco"
-              required
-            >
-              <input
-                name="asset_code"
+          {isCreateMode ? (
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field
+                label="Quantità"
+                hint="Unità fisiche"
                 required
-                defaultValue={
-                  initialData?.asset_code ??
-                  ""
-                }
-                placeholder="Es. CAM-A7IV-01"
-                className={`${inputClass} font-mono`}
-              />
-            </Field>
+              >
+                <input
+                  name="quantity"
+                  type="number"
+                  min="1"
+                  max="99"
+                  step="1"
+                  defaultValue="1"
+                  required
+                  className={inputClass}
+                />
+              </Field>
 
+              <Field
+                label="Numero seriale"
+                hint="Solo se aggiungi 1 unità"
+              >
+                <input
+                  name="serial_number"
+                  placeholder="Seriale produttore"
+                  className={`${inputClass} font-mono`}
+                />
+              </Field>
 
-            <Field
-              label="Numero seriale"
-            >
-              <input
-                name="serial_number"
-                defaultValue={
-                  initialData?.serial_number ??
-                  ""
-                }
-                placeholder="Seriale produttore"
-                className={`${inputClass} font-mono`}
-              />
-            </Field>
+              <div className="sm:col-span-2 rounded-[16px] bg-[#f3f2ed] px-5 py-4 text-[13px] leading-6 text-black/50">
+                Il sistema userà codici del tipo <span className="font-mono font-semibold text-black/70">LAP-0012-02</span>,
+                continuando automaticamente dalla numerazione già presente per il prodotto.
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field
+                label="Asset code"
+                hint="Univoco"
+                required
+              >
+                <input
+                  name="asset_code"
+                  required
+                  defaultValue={
+                    initialData?.asset_code ??
+                    ""
+                  }
+                  placeholder="Es. LAP-0012-02"
+                  className={`${inputClass} font-mono`}
+                />
+              </Field>
 
-          </div>
+              <Field
+                label="Numero seriale"
+              >
+                <input
+                  name="serial_number"
+                  defaultValue={
+                    initialData?.serial_number ??
+                    ""
+                  }
+                  placeholder="Seriale produttore"
+                  className={`${inputClass} font-mono`}
+                />
+              </Field>
+            </div>
+          )}
         </FormPanel>
 
 
