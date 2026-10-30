@@ -31,6 +31,7 @@ type Props = {
   totalQuantity: number;
   checkoutMissing: number;
   returnMissing: number;
+  quoteSent: boolean;
   canOperate: boolean;
 };
 
@@ -113,6 +114,7 @@ export function RentalWorkflowPanel({
   totalQuantity,
   checkoutMissing,
   returnMissing,
+  quoteSent,
   canOperate,
 }: Props) {
   const router =
@@ -248,8 +250,44 @@ export function RentalWorkflowPanel({
       currentStatus ===
       "requested"
     ) {
+      if (!quoteSent) {
+        return (
+          <div>
+            <div className="mb-4 rounded-[16px] border border-[#d98a08]/15 bg-[#fff2d5] px-4 py-4 text-[13px] leading-6 text-[#8a650f]">
+              Prima prepara e invia il preventivo al cliente.
+            </div>
+
+            <a
+              href="#preventivo"
+              className="flex min-h-[64px] w-full items-center justify-center rounded-[17px] bg-[#ff5a1f] px-6 text-[16px] font-semibold text-white transition hover:bg-[#e94b12]"
+            >
+              Prepara preventivo →
+            </a>
+
+            <button
+              type="button"
+              disabled={
+                loading !== null
+              }
+              onClick={() =>
+                void run(
+                  "cancel"
+                )
+              }
+              className="mt-4 text-[12px] font-semibold text-black/35 transition hover:text-[#b7352b] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Annulla richiesta
+            </button>
+          </div>
+        );
+      }
+
       return (
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+        <div>
+          <div className="mb-4 rounded-[16px] border border-[#168a50]/15 bg-[#e9f6ee] px-4 py-4 text-[13px] leading-6 text-[#126f41]">
+            ✓ Preventivo inviato. Quando il cliente accetta, conferma la richiesta.
+          </div>
+
           <button
             type="button"
             disabled={
@@ -260,12 +298,12 @@ export function RentalWorkflowPanel({
                 "confirm"
               )
             }
-            className="flex min-h-[64px] items-center justify-center rounded-[17px] bg-[#ff5a1f] px-6 text-[16px] font-semibold text-white transition hover:bg-[#e94b12] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-[64px] w-full items-center justify-center rounded-[17px] bg-[#ff5a1f] px-6 text-[16px] font-semibold text-white transition hover:bg-[#e94b12] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ===
             "confirm"
               ? "Confermo..."
-              : "Conferma richiesta →"}
+              : "Cliente ha confermato →"}
           </button>
 
           <button
@@ -278,9 +316,9 @@ export function RentalWorkflowPanel({
                 "cancel"
               )
             }
-            className="min-h-[64px] rounded-[17px] border border-black/10 bg-white px-6 text-[14px] font-semibold text-black/45 transition hover:border-[#cf3d32]/25 hover:bg-[#fff0ee] hover:text-[#b7352b] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 text-[12px] font-semibold text-black/35 transition hover:text-[#b7352b] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Annulla
+            Annulla richiesta
           </button>
         </div>
       );
@@ -292,30 +330,38 @@ export function RentalWorkflowPanel({
     ) {
       return (
         <div>
-          {!allAssigned && (
-            <div className="mb-4 rounded-[16px] border border-[#d98a08]/15 bg-[#fff2d5] px-4 py-4 text-[13px] leading-6 text-[#8a650f]">
-              Prima della consegna devi assegnare tutte le unità fisiche: <strong>{totalAssigned}/{totalQuantity}</strong> assegnate.
-            </div>
-          )}
+          {!allAssigned ? (
+            <>
+              <div className="mb-4 rounded-[16px] border border-[#d98a08]/15 bg-[#fff2d5] px-4 py-4 text-[13px] leading-6 text-[#8a650f]">
+                Ora prepara il kit: <strong>{totalAssigned}/{totalQuantity}</strong> unità assegnate.
+              </div>
 
-          <button
-            type="button"
-            disabled={
-              loading !== null ||
-              !allAssigned
-            }
-            onClick={() =>
-              void run(
-                "pickup"
-              )
-            }
-            className="flex min-h-[64px] w-full items-center justify-center rounded-[17px] bg-[#181818] px-6 text-[16px] font-semibold text-white transition hover:bg-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            {loading ===
-            "pickup"
-              ? "Registro consegna..."
-              : "Materiale consegnato al cliente →"}
-          </button>
+              <a
+                href="#materiale"
+                className="flex min-h-[64px] w-full items-center justify-center rounded-[17px] bg-[#181818] px-6 text-[16px] font-semibold text-white transition hover:bg-[#ff5a1f]"
+              >
+                Assegna materiale →
+              </a>
+            </>
+          ) : (
+            <button
+              type="button"
+              disabled={
+                loading !== null
+              }
+              onClick={() =>
+                void run(
+                  "pickup"
+                )
+              }
+              className="flex min-h-[64px] w-full items-center justify-center rounded-[17px] bg-[#181818] px-6 text-[16px] font-semibold text-white transition hover:bg-[#ff5a1f] disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              {loading ===
+              "pickup"
+                ? "Registro consegna..."
+                : "Consegna materiale →"}
+            </button>
+          )}
 
           <p className="mt-3 text-[12px] leading-5 text-black/40">
             I controlli di consegna ancora vuoti verranno registrati automaticamente come <strong>Tutto OK</strong>. Se c&apos;è un danno o un&apos;anomalia, registrala prima nei controlli dettagliati.
@@ -430,7 +476,7 @@ export function RentalWorkflowPanel({
             </h2>
 
             <p className="mt-2 max-w-[700px] text-[14px] leading-6 text-black/45">
-              Una sola azione per passare allo step successivo. I controlli tecnici restano disponibili sotto solo quando servono.
+              Segui l'azione evidenziata: il sistema ti porta sempre al prossimo passaggio necessario, senza saltare step.
             </p>
           </div>
 
