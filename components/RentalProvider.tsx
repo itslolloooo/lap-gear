@@ -131,6 +131,8 @@ function loadGoogleAnalytics() {
           true,
         send_page_view:
           false,
+        debug_mode:
+          true,
       }
     );
 
@@ -160,7 +162,13 @@ export function trackAnalyticsEvent(
   window.gtag?.(
     "event",
     name,
-    params
+    {
+      ...params,
+      send_to:
+        GA_ID,
+      debug_mode:
+        true,
+    }
   );
 }
 
