@@ -44,11 +44,9 @@ import {
 
 import {
 
-
+  trackAnalyticsEvent,
 
   useRental,
-
-
 
 } from "@/components/RentalProvider";
 
@@ -1871,6 +1869,84 @@ export default function RentalPage() {
 
 
 
+
+
+
+      trackAnalyticsEvent(
+
+        "generate_lead",
+
+        {
+
+          currency:
+
+            "EUR",
+
+          value:
+
+            total,
+
+          lead_type:
+
+            "rental_request",
+
+          reference:
+
+            result.reference,
+
+          rental_days:
+
+            days,
+
+          items:
+
+            items.map(
+
+              (item) => ({
+
+                item_id:
+
+                  String(
+
+                    item.product.id
+
+                  ),
+
+                item_name:
+
+                  item.product.name,
+
+                item_brand:
+
+                  item.product.brand ||
+
+                  undefined,
+
+                item_category:
+
+                  item.product.categoryLabel,
+
+                price:
+
+                  Number(
+
+                    item.product.priceDay ||
+
+                    0
+
+                  ),
+
+                quantity:
+
+                  item.quantity,
+
+              })
+
+            ),
+
+        }
+
+      );
 
 
 
