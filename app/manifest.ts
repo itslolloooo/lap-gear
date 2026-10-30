@@ -14,7 +14,7 @@ export default function manifest():
       "LAP GEAR",
 
     description:
-      "Noleggio attrezzatura foto, video, audio e live production.",
+      "Noleggio attrezzatura video, audio, luci e live production a Palestrina, Roma Est e Roma.",
 
     start_url:
       "/",
