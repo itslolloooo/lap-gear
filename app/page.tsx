@@ -174,10 +174,10 @@ export default async function HomePage() {
 
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <Link
-                    href="/catalogo"
-                    className="inline-flex h-[60px] items-center justify-center gap-4 rounded-[17px] bg-[#181818] px-7 text-[16px] font-semibold text-white transition hover:bg-[#ff5a1f]"
+                    href="/kit"
+                    className="inline-flex h-[60px] items-center justify-center gap-4 rounded-[17px] bg-[#ff5a1f] px-7 text-[16px] font-semibold text-white transition hover:bg-[#181818]"
                   >
-                    Esplora il catalogo
+                    Scegli un kit pronto
 
                     <span className="text-[20px]">
                       →
@@ -185,10 +185,10 @@ export default async function HomePage() {
                   </Link>
 
                   <Link
-                    href="/#come-funziona"
+                    href="/catalogo"
                     className="inline-flex h-[60px] items-center justify-center rounded-[17px] border border-black/10 bg-[#f1f0ea] px-7 text-[16px] font-semibold transition hover:border-black/25 hover:bg-white"
                   >
-                    Come funziona
+                    Catalogo completo
                   </Link>
                 </div>
               </div>
@@ -361,6 +361,85 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-5 pb-2 sm:px-8 lg:px-10 xl:px-14">
+        <div className="mx-auto grid max-w-[1680px] overflow-hidden rounded-[22px] border border-black/10 bg-white sm:grid-cols-2 xl:grid-cols-4">
+          <TrustPoint
+            title="Prezzi trasparenti"
+            text="Tariffe giornaliere visibili prima della richiesta."
+          />
+          <TrustPoint
+            title="Disponibilità reale"
+            text="Il materiale viene verificato sulle date selezionate."
+          />
+          <TrustPoint
+            title="Ritiro locale"
+            text="Ritiro su appuntamento a Palestrina."
+          />
+          <TrustPoint
+            title="Nessun checkout cieco"
+            text="Prima verifichiamo il kit, poi confermiamo il noleggio."
+          />
+        </div>
+      </section>
+
+      <section className="px-5 py-12 sm:px-8 lg:px-10 lg:py-16 xl:px-14">
+        <div className="mx-auto max-w-[1680px]">
+          <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#ff5a1f]">
+                Parti più veloce
+              </div>
+
+              <h2 className="mt-3 text-[44px] font-semibold leading-[0.95] tracking-[-0.055em] sm:text-[58px]">
+                Kit già pronti
+                <br />
+                per lavori reali.
+              </h2>
+            </div>
+
+            <div className="max-w-[520px]">
+              <p className="text-[16px] leading-7 text-black/50">
+                Non sai da dove partire? Scegli il tipo di produzione e carica tutto il materiale necessario con un click.
+              </p>
+
+              <Link
+                href="/kit"
+                className="mt-4 inline-flex text-[14px] font-semibold text-[#ff5a1f]"
+              >
+                Vedi tutti i kit →
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <KitShortcut
+              href="/kit"
+              eyebrow="Video"
+              title="Videomaker"
+              text="Full frame, zoom, gimbal e cavalletto."
+            />
+            <KitShortcut
+              href="/kit"
+              eyebrow="Corporate"
+              title="Intervista"
+              text="Camera, ottica, microfono wireless e luce."
+            />
+            <KitShortcut
+              href="/kit"
+              eyebrow="Audio"
+              title="Podcast"
+              text="Due microfoni broadcast e interfaccia audio."
+            />
+            <KitShortcut
+              href="/kit"
+              eyebrow="Live"
+              title="Multicamera"
+              text="Due camere, ottiche, cavalletti e regia."
+            />
           </div>
         </div>
       </section>
@@ -596,6 +675,43 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="px-5 pb-14 sm:px-8 lg:px-10 lg:pb-20 xl:px-14">
+        <div className="mx-auto max-w-[1680px]">
+          <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+            <div>
+              <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#ff5a1f]">
+                Prima di richiedere
+              </div>
+
+              <h2 className="mt-3 text-[42px] font-semibold leading-[0.96] tracking-[-0.055em] sm:text-[52px]">
+                Domande
+                <br />
+                frequenti.
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              <FaqItem
+                question="La richiesta blocca subito il materiale?"
+                answer="No. Verifichiamo disponibilità e configurazione sulle date indicate e il noleggio viene confermato successivamente."
+              />
+              <FaqItem
+                question="Posso modificare un kit pronto?"
+                answer="Sì. Il kit pronto serve come base: dopo averlo aggiunto puoi cambiare quantità, togliere prodotti o aggiungere altro gear."
+              />
+              <FaqItem
+                question="Dove si ritira il materiale?"
+                answer="Il ritiro viene organizzato su appuntamento a Palestrina. I dettagli vengono concordati nella conferma."
+              />
+              <FaqItem
+                question="Come vengono gestiti pagamento e cauzione?"
+                answer="Importo, modalità di pagamento ed eventuale cauzione vengono indicati nel preventivo prima della conferma del noleggio."
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* =====================================================
           CONTACT
           ===================================================== */}
@@ -627,7 +743,7 @@ export default async function HomePage() {
 
             <div className="border-t border-black/10 p-8 lg:border-l lg:border-t-0 lg:p-12">
               <a
-                href="mailto:info@lapequipment.it"
+                href="mailto:info@lapgear.it"
                 className="group flex min-w-[260px] items-center justify-between gap-8 rounded-[20px] bg-[#ff5a1f] px-6 py-5 text-white transition hover:bg-[#181818]"
               >
                 <div>
@@ -636,7 +752,7 @@ export default async function HomePage() {
                   </div>
 
                   <div className="mt-1 text-[16px] font-semibold">
-                    info@lapequipment.it
+                    info@lapgear.it
                   </div>
                 </div>
 
@@ -716,5 +832,87 @@ function ProcessStep({
         {text}
       </p>
     </div>
+  );
+}
+
+function TrustPoint({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="border-b border-black/10 p-5 last:border-b-0 sm:[&:nth-child(odd)]:border-r xl:border-b-0 xl:border-r xl:last:border-r-0">
+      <div className="flex items-start gap-3">
+        <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e9f6ee] text-[10px] font-bold text-[#168a50]">
+          ✓
+        </span>
+        <div>
+          <div className="text-[13px] font-semibold">
+            {title}
+          </div>
+          <div className="mt-1 text-[11px] leading-5 text-black/40">
+            {text}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KitShortcut({
+  href,
+  eyebrow,
+  title,
+  text,
+}: {
+  href: string;
+  eyebrow: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-[24px] border border-black/10 bg-white p-6 transition hover:-translate-y-1 hover:border-[#ff5a1f]/25 hover:shadow-[0_18px_45px_rgba(0,0,0,0.06)]"
+    >
+      <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
+        {eyebrow}
+      </div>
+      <div className="mt-2 text-[28px] font-semibold tracking-[-0.045em]">
+        {title}
+      </div>
+      <p className="mt-3 text-[13px] leading-6 text-black/45">
+        {text}
+      </p>
+      <div className="mt-6 text-[13px] font-semibold transition group-hover:text-[#ff5a1f]">
+        Apri kit →
+      </div>
+    </Link>
+  );
+}
+
+function FaqItem({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) {
+  return (
+    <details className="group overflow-hidden rounded-[20px] border border-black/10 bg-white">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 sm:px-6">
+        <span className="text-[15px] font-semibold">
+          {question}
+        </span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f1f0ea] text-[17px] text-black/40 transition group-open:rotate-45">
+          +
+        </span>
+      </summary>
+      <p className="border-t border-black/10 px-5 py-5 text-[13px] leading-6 text-black/50 sm:px-6">
+        {answer}
+      </p>
+    </details>
   );
 }
