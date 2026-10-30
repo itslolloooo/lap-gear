@@ -274,6 +274,13 @@ export default async function EditProductPage({
                   </Link>
 
                   <Link
+                    href={`/admin/inventario/nuovo?product=${product.id}`}
+                    className="flex h-[52px] items-center justify-center rounded-[15px] bg-[#ff5a1f] px-5 text-[14px] font-semibold text-white transition hover:bg-[#181818]"
+                  >
+                    + Aggiungi unità
+                  </Link>
+
+                  <Link
                     href={`/prodotto/${product.slug}`}
                     target="_blank"
                     className="flex h-[52px] items-center justify-center rounded-[15px] bg-[#181818] px-5 text-[14px] font-semibold text-white transition hover:bg-[#ff5a1f]"
