@@ -1310,27 +1310,8 @@ export default async function AdminRequestPage({
   return (
     <main className="min-h-screen bg-[#ebeae4] px-5 pb-16 pt-6 text-[#111111] sm:px-8 lg:px-10 lg:pb-20 xl:px-14">
       <div className="mx-auto max-w-[1460px]">
-        <div className="mb-5 flex items-center gap-2 overflow-hidden text-[13px] font-semibold text-black/40">
-          <Link
-            href="/admin"
-            className="shrink-0 transition hover:text-[#ff5a1f]"
-          >
-            Admin
-          </Link>
-          <span>/</span>
-          <Link
-            href="/admin/richieste"
-            className="shrink-0 transition hover:text-[#ff5a1f]"
-          >
-            Richieste
-          </Link>
-          <span>/</span>
-          <span className="truncate text-black/65">
-            {reservation.reference}
-          </span>
-        </div>
-
         {/* HEADER COMPATTO */}
+
         <section className="overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-[0_16px_50px_rgba(0,0,0,0.05)]">
           <div className="grid xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
             <div className="p-6 sm:p-8">
@@ -1411,12 +1392,7 @@ export default async function AdminRequestPage({
                 </div>
               </div>
 
-              <Link
-                href="/admin/richieste"
-                className="mt-6 flex h-[48px] items-center justify-center rounded-[14px] border border-white/10 bg-white/[0.07] px-5 text-[13px] font-semibold text-white transition hover:bg-white hover:text-[#181818]"
-              >
-                ← Tutte le richieste
-              </Link>
+
             </div>
           </div>
         </section>
@@ -1441,6 +1417,11 @@ export default async function AdminRequestPage({
             returnMissing={
               returnMissing
             }
+            quoteSent={
+              Boolean(
+                reservation.quote_sent_at
+              )
+            }
             canOperate={
               canOperate
             }
@@ -1463,6 +1444,7 @@ export default async function AdminRequestPage({
           <div className="space-y-5">
             {/* PREVENTIVO */}
             <details
+              id="preventivo"
               open={
                 reservation.status ===
                   "requested" &&
