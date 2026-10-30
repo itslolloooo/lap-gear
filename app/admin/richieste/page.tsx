@@ -254,6 +254,45 @@ function statusClasses(
 }
 
 
+function nextActionLabel(
+  reservation:
+    Reservation
+) {
+  if (
+    reservation.status ===
+    "requested"
+  ) {
+    return reservation.quote_sent_at
+      ? "Attendi conferma"
+      : "Prepara preventivo";
+  }
+
+  if (
+    reservation.status ===
+    "confirmed"
+  ) {
+    return "Prepara materiale";
+  }
+
+  if (
+    reservation.status ===
+    "picked_up"
+  ) {
+    return "Gestisci rientro";
+  }
+
+  if (
+    reservation.status ===
+    "returned"
+  ) {
+    return "Completata";
+  }
+
+  return "Nessuna azione";
+}
+
+
+
 function estimatedTotal(
   reservation:
     Reservation
@@ -707,15 +746,6 @@ export default async function AdminRequestsPage({
 
               <div className="flex flex-wrap items-center gap-3">
 
-                <Link
-                  href="/admin"
-                  className="text-[13px] font-semibold text-black/40 transition hover:text-[#ff5a1f]"
-                >
-                  ← Dashboard
-                </Link>
-
-                <span className="h-1 w-1 rounded-full bg-black/20" />
-
                 <div className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#ff5a1f]">
                   Rental control
                 </div>
@@ -955,7 +985,7 @@ export default async function AdminRequestsPage({
 
           <section className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
 
-            <div className="hidden grid-cols-[160px_minmax(180px,1fr)_175px_minmax(220px,1.2fr)_155px_180px_72px] gap-4 border-b border-black/10 bg-[#f5f4ef] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.09em] text-black/30 xl:grid">
+            <div className="hidden grid-cols-[150px_minmax(180px,1fr)_170px_minmax(210px,1.1fr)_145px_150px_175px_72px] gap-4 border-b border-black/10 bg-[#f5f4ef] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.09em] text-black/30 xl:grid">
 
               <div>
                 Richiesta
@@ -979,6 +1009,10 @@ export default async function AdminRequestsPage({
 
               <div>
                 Stato
+              </div>
+
+              <div>
+                Prossima azione
               </div>
 
               <div className="text-right">
@@ -1058,7 +1092,7 @@ export default async function AdminRequestsPage({
                       className="group transition hover:bg-[#fcfbf8]"
                     >
 
-                      <div className="grid gap-4 p-5 sm:p-6 xl:grid-cols-[160px_minmax(180px,1fr)_175px_minmax(220px,1.2fr)_155px_180px_72px] xl:items-center xl:px-5 xl:py-4">
+                      <div className="grid gap-4 p-5 sm:p-6 xl:grid-cols-[150px_minmax(180px,1fr)_170px_minmax(210px,1.1fr)_145px_150px_175px_72px] xl:items-center xl:px-5 xl:py-4">
 
                         <div className="min-w-0">
 
@@ -1223,6 +1257,27 @@ export default async function AdminRequestsPage({
                         </div>
 
 
+                        <div>
+                          <div className="text-[12px] font-semibold text-black/65">
+                            {nextActionLabel(
+                              reservation
+                            )}
+                          </div>
+
+                          <div className="mt-1 text-[10px] text-black/30">
+                            {reservation.status === "requested"
+                              ? quoteSent
+                                ? "Preventivo già inviato"
+                                : "Primo step"
+                              : reservation.status === "confirmed"
+                                ? "Assegna il gear"
+                                : reservation.status === "picked_up"
+                                  ? "Alla riconsegna"
+                                  : "Workflow terminato"}
+                          </div>
+                        </div>
+
+
                         <div className="xl:text-right">
 
                           <Link
@@ -1230,7 +1285,7 @@ export default async function AdminRequestsPage({
                             className="inline-flex h-10 items-center justify-center rounded-[12px] bg-[#181818] px-4 text-[12px] font-semibold text-white transition group-hover:bg-[#ff5a1f]"
                           >
                             {canOperate
-                              ? "Gestisci"
+                              ? "Continua"
                               : "Apri"}
                           </Link>
 
