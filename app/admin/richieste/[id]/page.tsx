@@ -1397,174 +1397,49 @@ export default async function AdminRequestPage({
           </div>
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-[26px] border border-black/10 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
-          <div className="flex flex-col gap-4 border-b border-black/10 bg-[#fffaf6] px-6 py-5 sm:flex-row sm:items-end sm:justify-between sm:px-7">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
-                Materiale richiesto
-              </div>
-
-              <h2 className="mt-1 text-[28px] font-semibold tracking-[-0.04em]">
-                Cosa vuole noleggiare il cliente.
-              </h2>
-
-              <p className="mt-2 text-[13px] leading-6 text-black/45">
-                Questa è la base del preventivo: quantità richieste, tariffa giornaliera e subtotale sul periodo selezionato.
-              </p>
-            </div>
-
-            <div className="rounded-[16px] bg-[#181818] px-5 py-4 text-white">
-              <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-white/35">
-                Stima catalogo
-              </div>
-
-              <div className="mt-1 text-[26px] font-semibold tracking-[-0.04em] text-[#ff7b4a]">
-                {formatMoney(
-                  total
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="divide-y divide-black/10">
-            {items.map(
-              (
-                item
-              ) => {
-                const product =
-                  first(
-                    item.products
-                  );
-
-                const lineTotal =
-                  Number(
-                    item.price_day
-                  ) *
-                  item.quantity *
-                  days;
-
-                return (
-                  <div
-                    key={
-                      item.id
-                    }
-                    className="grid gap-4 px-6 py-5 sm:px-7 lg:grid-cols-[minmax(0,1fr)_120px_140px_160px] lg:items-center"
-                  >
-                    <div>
-                      <div className="text-[18px] font-semibold tracking-[-0.025em]">
-                        {product?.name ??
-                          "Prodotto"}
-                      </div>
-
-                      <div className="mt-1 text-[12px] text-black/35">
-                        {days}{" "}
-                        {days ===
-                        1
-                          ? "giorno"
-                          : "giorni"}{" "}
-                        di noleggio
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-black/30">
-                        Quantità
-                      </div>
-
-                      <div className="mt-1 text-[16px] font-semibold">
-                        {item.quantity}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-black/30">
-                        Prezzo / giorno
-                      </div>
-
-                      <div className="mt-1 text-[16px] font-semibold">
-                        {formatMoney(
-                          Number(
-                            item.price_day
-                          )
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="lg:text-right">
-                      <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-black/30">
-                        Subtotale
-                      </div>
-
-                      <div className="mt-1 text-[18px] font-semibold text-[#ff5a1f]">
-                        {formatMoney(
-                          lineTotal
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
+        <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
+          <div className="order-2 min-w-0 space-y-5 xl:order-1">
+            <RentalWorkflowPanel
+              requestId={
+                reservation.id
               }
-            )}
-          </div>
+              currentStatus={
+                reservation.status
+              }
+              totalAssigned={
+                totalAssigned
+              }
+              totalQuantity={
+                totalQuantity
+              }
+              checkoutMissing={
+                checkoutMissing
+              }
+              returnMissing={
+                returnMissing
+              }
+              quoteSent={
+                Boolean(
+                  reservation.quote_sent_at
+                )
+              }
+              canOperate={
+                canOperate
+              }
+            />
 
-          {reservation.notes && (
-            <div className="border-t border-black/10 bg-[#f6f5f0] px-6 py-5 sm:px-7">
-              <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
-                Note del cliente
+            {query.statusError && (
+              <div className="rounded-[15px] border border-[#cf3d32]/15 bg-[#fff0ee] px-5 py-4 text-[13px] font-medium leading-6 text-[#9d352c]">
+                {query.statusError}
               </div>
+            )}
 
-              <p className="mt-2 whitespace-pre-wrap text-[13px] leading-6 text-black/55">
-                {reservation.notes}
-              </p>
-            </div>
-          )}
-        </section>
+            {query.statusSuccess && (
+              <div className="rounded-[15px] border border-[#168a50]/15 bg-[#e9f6ee] px-5 py-4 text-[13px] font-semibold text-[#168a50]">
+                ✓ {query.statusSuccess}
+              </div>
+            )}
 
-        <div className="mt-6">
-          <RentalWorkflowPanel
-            requestId={
-              reservation.id
-            }
-            currentStatus={
-              reservation.status
-            }
-            totalAssigned={
-              totalAssigned
-            }
-            totalQuantity={
-              totalQuantity
-            }
-            checkoutMissing={
-              checkoutMissing
-            }
-            returnMissing={
-              returnMissing
-            }
-            quoteSent={
-              Boolean(
-                reservation.quote_sent_at
-              )
-            }
-            canOperate={
-              canOperate
-            }
-          />
-        </div>
-
-        {query.statusError && (
-          <div className="mt-4 rounded-[15px] border border-[#cf3d32]/15 bg-[#fff0ee] px-5 py-4 text-[13px] font-medium leading-6 text-[#9d352c]">
-            {query.statusError}
-          </div>
-        )}
-
-        {query.statusSuccess && (
-          <div className="mt-4 rounded-[15px] border border-[#168a50]/15 bg-[#e9f6ee] px-5 py-4 text-[13px] font-semibold text-[#168a50]">
-            ✓ {query.statusSuccess}
-          </div>
-        )}
-
-        <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_330px]">
-          <div className="space-y-5">
             {/* PREVENTIVO */}
             <details
               id="preventivo"
@@ -2376,71 +2251,229 @@ export default async function AdminRequestPage({
             </section>
           </div>
 
-          <aside className="space-y-5 xl:sticky xl:top-[100px]">
-            <section className="rounded-[24px] border border-black/10 bg-white p-6">
-              <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
-                Riepilogo
+          <aside className="order-1 space-y-4 xl:order-2 xl:sticky xl:top-[88px]">
+            <section className="overflow-hidden rounded-[26px] border border-black/10 bg-white shadow-[0_14px_45px_rgba(0,0,0,0.055)]">
+              <div className="bg-[#181818] p-6 text-white">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.11em] text-[#ff7b4a]">
+                      Riepilogo ordine
+                    </div>
+
+                    <div className="mt-2 font-mono text-[19px] font-semibold tracking-[-0.025em]">
+                      {reservation.reference}
+                    </div>
+                  </div>
+
+                  <StatusBadge
+                    status={
+                      reservation.status
+                    }
+                  />
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-[15px] bg-white/[0.07] p-4">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.08em] text-white/30">
+                      Dal
+                    </div>
+                    <div className="mt-1 text-[14px] font-semibold">
+                      {formatDate(
+                        reservation.start_date
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[15px] bg-white/[0.07] p-4">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.08em] text-white/30">
+                      Al
+                    </div>
+                    <div className="mt-1 text-[14px] font-semibold">
+                      {formatDate(
+                        reservation.end_date
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between rounded-[15px] bg-white/[0.07] px-4 py-3">
+                  <span className="text-[11px] text-white/40">
+                    Durata
+                  </span>
+                  <span className="text-[13px] font-semibold">
+                    {days} {days === 1 ? "giorno" : "giorni"}
+                  </span>
+                </div>
               </div>
 
-              <div className="mt-5 space-y-4">
-                <InfoRow
-                  label="Riferimento"
-                  value={
-                    reservation.reference
-                  }
-                  mono
-                />
+              <div className="border-b border-black/10 p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
+                      Cliente
+                    </div>
+                    <div className="mt-1 text-[17px] font-semibold">
+                      {customer?.name ?? "Cliente"}
+                    </div>
+                  </div>
 
-                <InfoRow
-                  label="Ricevuta"
-                  value={formatDateTime(
-                    reservation.created_at
+                  <div className="text-right text-[11px] text-black/35">
+                    {totalQuantity} {totalQuantity === 1 ? "pezzo" : "pezzi"}
+                  </div>
+                </div>
+
+                {customer?.email && (
+                  <a
+                    href={`mailto:${customer.email}`}
+                    className="mt-3 block truncate text-[12px] text-black/45 transition hover:text-[#ff5a1f]"
+                  >
+                    {customer.email}
+                  </a>
+                )}
+
+                {customer?.phone && (
+                  <a
+                    href={`tel:${customer.phone}`}
+                    className="mt-1 block text-[12px] text-black/45 transition hover:text-[#ff5a1f]"
+                  >
+                    {customer.phone}
+                  </a>
+                )}
+              </div>
+
+              <div className="border-b border-black/10">
+                <div className="px-6 pb-3 pt-5">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+                    Materiale richiesto
+                  </div>
+                </div>
+
+                <div className="divide-y divide-black/10">
+                  {items.map(
+                    (
+                      item
+                    ) => {
+                      const product =
+                        first(
+                          item.products
+                        );
+
+                      const lineTotal =
+                        Number(
+                          item.price_day
+                        ) *
+                        item.quantity *
+                        days;
+
+                      return (
+                        <div
+                          key={
+                            item.id
+                          }
+                          className="px-6 py-4"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0">
+                              <div className="text-[14px] font-semibold leading-5">
+                                {product?.name ??
+                                  "Prodotto"}
+                              </div>
+
+                              <div className="mt-1 text-[11px] text-black/35">
+                                {item.quantity} × {formatMoney(
+                                  Number(
+                                    item.price_day
+                                  )
+                                )}/giorno
+                              </div>
+                            </div>
+
+                            <div className="shrink-0 text-right">
+                              <div className="text-[13px] font-semibold">
+                                {formatMoney(
+                                  lineTotal
+                                )}
+                              </div>
+
+                              {reservation.status ===
+                                "confirmed" && (
+                                <div className="mt-1 text-[10px] text-black/30">
+                                  {
+                                    item.unit_assignments
+                                      ?.length ??
+                                    0
+                                  }/{item.quantity} assegnate
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
                   )}
-                />
-
-                <InfoRow
-                  label="Periodo"
-                  value={`${formatDate(reservation.start_date)} → ${formatDate(reservation.end_date)}`}
-                />
-
-                <InfoRow
-                  label="Attrezzatura"
-                  value={`${totalQuantity} ${totalQuantity === 1 ? "pezzo" : "pezzi"}`}
-                />
-
-                <InfoRow
-                  label="Unità assegnate"
-                  value={`${totalAssigned}/${totalQuantity}`}
-                />
-              </div>
-            </section>
-
-            <section className="rounded-[24px] bg-[#181818] p-6 text-white">
-              <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff7b4a]">
-                Contatto cliente
+                </div>
               </div>
 
-              <div className="mt-4 text-[18px] font-semibold">
-                {customer?.name ?? "Cliente"}
-              </div>
-
-              {customer?.email && (
-                <a
-                  href={`mailto:${customer.email}`}
-                  className="mt-3 block break-all text-[13px] text-white/55 transition hover:text-[#ff7b4a]"
-                >
-                  {customer.email}
-                </a>
+              {reservation.notes && (
+                <div className="border-b border-black/10 bg-[#fffaf6] px-6 py-4">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-[#b14a20]">
+                    Note cliente
+                  </div>
+                  <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-[12px] leading-5 text-black/55">
+                    {reservation.notes}
+                  </p>
+                </div>
               )}
 
-              {customer?.phone && (
-                <a
-                  href={`tel:${customer.phone}`}
-                  className="mt-2 block text-[13px] text-white/55 transition hover:text-[#ff7b4a]"
-                >
-                  {customer.phone}
-                </a>
-              )}
+              <div className="p-6">
+                <div className="flex items-end justify-between gap-5">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
+                      {quotedTotal !== null
+                        ? "Totale preventivo"
+                        : "Stima catalogo"}
+                    </div>
+
+                    {quotedTotal !== null &&
+                      quotedTotal !== total && (
+                      <div className="mt-1 text-[11px] text-black/30">
+                        Stima catalogo {formatMoney(
+                          total
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-[28px] font-semibold tracking-[-0.045em] text-[#ff5a1f]">
+                    {formatMoney(
+                      quotedTotal ??
+                        total
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-[14px] bg-[#f3f2ed] px-4 py-3">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.08em] text-black/30">
+                      Assegnate
+                    </div>
+                    <div className="mt-1 text-[13px] font-semibold">
+                      {totalAssigned}/{totalQuantity}
+                    </div>
+                  </div>
+
+                  <div className="rounded-[14px] bg-[#f3f2ed] px-4 py-3">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.08em] text-black/30">
+                      Preventivo
+                    </div>
+                    <div className="mt-1 text-[13px] font-semibold">
+                      {reservation.quote_sent_at
+                        ? "Inviato"
+                        : "Da fare"}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {canDelete && (
