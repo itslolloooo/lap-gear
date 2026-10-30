@@ -202,10 +202,10 @@ export default async function AdminPage() {
           <div
             className={`grid gap-5 ${
               isAdmin
-                ? "lg:grid-cols-5"
+                ? "lg:grid-cols-6"
                 : canManagePayments
-                  ? "lg:grid-cols-4"
-                  : "lg:grid-cols-3"
+                  ? "lg:grid-cols-5"
+                  : "lg:grid-cols-4"
             }`}
           >
             <AdminCard
@@ -246,10 +246,18 @@ export default async function AdminPage() {
               featured
             />
 
+            <AdminCard
+              href="/admin/calendario"
+              number="04"
+              eyebrow="Planning"
+              title="Calendario"
+              description="Tutti i noleggi distribuiti per giorno, dal ritiro al rientro."
+            />
+
             {canManagePayments && (
               <AdminCard
                 href="/admin/pagamenti"
-                number="04"
+                number="05"
                 eyebrow="Finance"
                 title="Pagamenti"
                 description="Incassi, acconti, rimborsi, storico e statistiche."
@@ -259,7 +267,7 @@ export default async function AdminPage() {
             {isAdmin && (
               <AdminCard
                 href="/admin/utenti"
-                number="05"
+                number="06"
                 eyebrow="Accessi"
                 title="Utenti"
                 description="Account staff, ruoli e autorizzazioni."
