@@ -33,6 +33,12 @@ export default async function AdminPage() {
     profile.role ===
     "admin";
 
+  const canManagePayments =
+    profile.role ===
+      "admin" ||
+    profile.role ===
+      "operator";
+
   const roleLabel =
     profile.role ===
       "admin"
@@ -195,8 +201,10 @@ export default async function AdminPage() {
           <div
             className={`grid gap-5 ${
               isAdmin
-                ? "lg:grid-cols-4"
-                : "lg:grid-cols-3"
+                ? "lg:grid-cols-5"
+                : canManagePayments
+                  ? "lg:grid-cols-4"
+                  : "lg:grid-cols-3"
             }`}
           >
             <AdminCard
@@ -237,10 +245,20 @@ export default async function AdminPage() {
               featured
             />
 
+            {canManagePayments && (
+              <AdminCard
+                href="/admin/pagamenti"
+                number="04"
+                eyebrow="Finance"
+                title="Pagamenti"
+                description="Incassi, acconti, rimborsi, storico e statistiche."
+              />
+            )}
+
             {isAdmin && (
               <AdminCard
                 href="/admin/utenti"
-                number="04"
+                number="05"
                 eyebrow="Accessi"
                 title="Utenti"
                 description="Account staff, ruoli e autorizzazioni."
