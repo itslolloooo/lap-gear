@@ -1,245 +1,60 @@
-import type {
-  Metadata,
-} from "next";
+import type { Metadata } from "next";
 
 import {
   PreparedKits,
   type PreparedKit,
 } from "@/components/PreparedKits";
 
-import {
-  getCatalogProducts,
-} from "@/lib/catalog-server";
+import { getCatalogProducts } from "@/lib/catalog-server";
+import { getStoredKits } from "@/lib/kits-server";
 
-export const dynamic =
-  "force-dynamic";
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title:
-    "Kit noleggio video già pronti",
+  title: "Kit noleggio video già pronti",
   description:
     "Kit LAP GEAR già configurati per videomaker, interviste, podcast e live streaming. Aggiungi tutto il materiale al carrello con un click.",
   alternates: {
-    canonical:
-      "https://lapgear.it/kit",
+    canonical: "https://lapgear.it/kit",
   },
 };
 
-const kitDefinitions = [
-  {
-    slug:
-      "videomaker-full-frame",
-    name:
-      "Videomaker Full Frame",
-    eyebrow:
-      "Video / Run & Gun",
-    description:
-      "Un setup completo e versatile per shooting, eventi, reel, contenuti corporate e produzioni leggere con stabilizzazione e supporto.",
-    idealFor: [
-      "Videomaker",
-      "Eventi",
-      "Reel",
-      "Corporate",
-    ],
-    items: [
-      {
-        id: 1,
-        quantity: 1,
-      },
-      {
-        id: 7,
-        quantity: 1,
-      },
-      {
-        id: 15,
-        quantity: 1,
-      },
-      {
-        id: 16,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    slug:
-      "intervista-corporate",
-    name:
-      "Intervista / Corporate",
-    eyebrow:
-      "Video / Interview",
-    description:
-      "Camera full frame, ottica luminosa, audio wireless e luce morbida: il necessario per interviste, testimonial e contenuti aziendali.",
-    idealFor: [
-      "Interviste",
-      "Testimonial",
-      "Corporate",
-      "YouTube",
-    ],
-    items: [
-      {
-        id: 1,
-        quantity: 1,
-      },
-      {
-        id: 7,
-        quantity: 1,
-      },
-      {
-        id: 17,
-        quantity: 1,
-      },
-      {
-        id: 9,
-        quantity: 1,
-      },
-      {
-        id: 10,
-        quantity: 1,
-      },
-      {
-        id: 16,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    slug:
-      "podcast-2-persone",
-    name:
-      "Podcast 2 persone",
-    eyebrow:
-      "Audio / Podcast",
-    description:
-      "Configurazione essenziale per registrare due voci con microfoni broadcast e interfaccia audio USB-C.",
-    idealFor: [
-      "Podcast",
-      "Voice over",
-      "Streaming",
-      "Interviste audio",
-    ],
-    items: [
-      {
-        id: 4,
-        quantity: 2,
-      },
-      {
-        id: 6,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    slug:
-      "live-multicamera",
-    name:
-      "Live Multicamera",
-    eyebrow:
-      "Live / Streaming",
-    description:
-      "Due camere full frame con ottiche dedicate, due cavalletti e regia ATEM per dirette, eventi e produzioni multicamera.",
-    idealFor: [
-      "Streaming",
-      "Eventi",
-      "Conferenze",
-      "Multicamera",
-    ],
-    items: [
-      {
-        id: 1,
-        quantity: 2,
-      },
-      {
-        id: 7,
-        quantity: 1,
-      },
-      {
-        id: 8,
-        quantity: 1,
-      },
-      {
-        id: 16,
-        quantity: 2,
-      },
-      {
-        id: 3,
-        quantity: 1,
-      },
-    ],
-  },
-] as const;
-
 export default async function KitsPage() {
-  const products =
-    await getCatalogProducts();
+  const [products, storedKits] = await Promise.all([
+    getCatalogProducts(),
+    getStoredKits({ activeOnly: true }),
+  ]);
 
-  const productMap =
-    new Map(
-      products.map(
-        (
-          product
-        ) => [
-          product.id,
-          product,
-        ]
-      )
-    );
+  const productMap = new Map(
+    products.map((product) => [product.id, product])
+  );
 
-  const kits:
-    PreparedKit[] =
-    kitDefinitions
-      .map(
-        (
-          definition
-        ) => ({
-          slug:
-            definition.slug,
-          name:
-            definition.name,
-          eyebrow:
-            definition.eyebrow,
-          description:
-            definition.description,
-          idealFor:
-            [...definition.idealFor],
-          products:
-            definition.items
-              .map(
-                (
-                  item
-                ) => {
-                  const product =
-                    productMap.get(
-                      item.id
-                    );
+  const kits: PreparedKit[] = storedKits
+    .map((kit) => ({
+      slug: kit.slug,
+      name: kit.name,
+      eyebrow: kit.eyebrow,
+      description: kit.description,
+      idealFor: kit.ideal_for,
+      products: kit.items
+        .map((item) => {
+          const product = productMap.get(item.product_id);
 
-                  return product
-                    ? {
-                        product,
-                        quantity:
-                          item.quantity,
-                      }
-                    : null;
-                }
-              )
-              .filter(
-                (
-                  item
-                ): item is NonNullable<
-                  typeof item
-                > =>
-                  Boolean(
-                    item
-                  )
-              ),
+          return product
+            ? {
+                product,
+                quantity: item.quantity,
+              }
+            : null;
         })
-      )
-      .filter(
-        (
-          kit
-        ) =>
-          kit.products.length >
-          0
-      );
+        .filter(
+          (
+            item
+          ): item is NonNullable<typeof item> =>
+            Boolean(item)
+        ),
+    }))
+    .filter((kit) => kit.products.length > 0);
 
   return (
     <main className="min-h-screen bg-[#ebeae4] px-5 pb-16 pt-6 text-[#111111] sm:px-8 lg:px-10 lg:pb-20 xl:px-14">
@@ -293,11 +108,13 @@ export default async function KitsPage() {
         </section>
 
         <section className="mt-7">
-          <PreparedKits
-            kits={
-              kits
-            }
-          />
+          {kits.length > 0 ? (
+            <PreparedKits kits={kits} />
+          ) : (
+            <div className="rounded-[24px] border border-black/10 bg-white p-8 text-[14px] text-black/45">
+              Nessun kit pronto pubblicato al momento.
+            </div>
+          )}
         </section>
       </div>
     </main>
