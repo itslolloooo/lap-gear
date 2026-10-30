@@ -1656,6 +1656,30 @@ export default function RentalPage() {
 
 
 
+      termsAccepted:
+
+
+
+        data.get(
+
+
+
+          "termsAccepted"
+
+
+
+        ) === "on",
+
+
+
+      termsVersion:
+
+
+
+        RENTAL_TERMS_VERSION,
+
+
+
 
 
 
@@ -4695,6 +4719,27 @@ export default function RentalPage() {
 
 
 
+
+                <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-[14px] border border-black/10 bg-white p-4">
+                  <input
+                    required
+                    type="checkbox"
+                    name="termsAccepted"
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-[#ff5a1f]"
+                  />
+
+                  <span className="text-[12px] leading-5 text-black/50">
+                    Ho letto e accetto le{" "}
+                    <Link
+                      href="/termini-noleggio"
+                      target="_blank"
+                      className="font-semibold text-[#ff5a1f] underline underline-offset-4"
+                    >
+                      Condizioni della richiesta e del noleggio
+                    </Link>
+                    .
+                  </span>
+                </label>
 
                 <p className="mt-4 text-[12px] leading-5 text-black/40">
 
