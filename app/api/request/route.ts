@@ -2291,6 +2291,53 @@ export async function POST(
     }
   );
 
+  const getEmailStatus = (
+    result:
+      PromiseSettledResult<unknown> |
+      undefined
+  ) => {
+    if (!result) {
+      return "not_configured";
+    }
+
+    if (
+      result.status ===
+      "rejected"
+    ) {
+      return "failed";
+    }
+
+    const value =
+      result.value as
+        | {
+            ok?: boolean;
+            skipped?: boolean;
+          }
+        | undefined;
+
+    if (
+      value?.skipped
+    ) {
+      return "skipped";
+    }
+
+    return value?.ok
+      ? "sent"
+      : "unknown";
+  };
+
+  const customerEmailStatus =
+    getEmailStatus(
+      emailResults[0]
+    );
+
+  const adminEmailStatus =
+    notificationEmail
+      ? getEmailStatus(
+          emailResults[1]
+        )
+      : "not_configured";
+
   /* =======================================================
      SUCCESS
      ======================================================= */
@@ -2306,6 +2353,14 @@ export async function POST(
         reservation.reference,
 
       statusPath,
+
+      emailStatus: {
+        customer:
+          customerEmailStatus,
+
+        admin:
+          adminEmailStatus,
+      },
 
     },
 
