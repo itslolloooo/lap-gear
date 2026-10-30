@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import {
@@ -9,10 +10,65 @@ import {
   getCatalogProducts,
 } from "@/lib/catalog-server";
 
+import {
+  getBusinessInfo,
+} from "@/lib/business-info";
+
 export const dynamic =
   "force-dynamic";
 
+export const metadata: Metadata = {
+  title: "Noleggio attrezzatura video a Palestrina e Roma",
+  description:
+    "Noleggio di videocamere, ottiche, audio, luci e attrezzatura professionale a Palestrina, Roma Est e Roma. Componi il tuo kit con LAP GEAR.",
+  alternates: {
+    canonical: "https://lapgear.it",
+  },
+};
+
 export default async function HomePage() {
+  const business =
+    getBusinessInfo();
+
+  const localBusinessStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "LAP GEAR",
+    url: "https://lapgear.it",
+    description:
+      "Noleggio di videocamere, ottiche, audio, luci e attrezzatura professionale per produzioni, shooting, eventi e live.",
+    email: business.email,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Via Prenestina Nuova 291",
+      postalCode: "00036",
+      addressLocality: "Palestrina",
+      addressRegion: "RM",
+      addressCountry: "IT",
+    },
+    areaServed: [
+      {
+        "@type": "City",
+        name: "Palestrina",
+      },
+      {
+        "@type": "Place",
+        name: "Roma Est",
+      },
+      {
+        "@type": "City",
+        name: "Roma",
+      },
+    ],
+    knowsAbout: [
+      "Noleggio videocamere",
+      "Noleggio ottiche",
+      "Noleggio attrezzatura audio",
+      "Noleggio illuminazione video",
+      "Noleggio attrezzatura streaming e live",
+    ],
+  };
+
   const [
     categories,
     products,
@@ -46,7 +102,18 @@ export default async function HomePage() {
       .slice(0, 3);
 
   return (
-    <main className="bg-[#ebeae4] text-[#111111]">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(localBusinessStructuredData).replace(
+            /</g,
+            "\\u003c"
+          ),
+        }}
+      />
+
+      <main className="bg-[#ebeae4] text-[#111111]">
 
       {/* =====================================================
           HERO
@@ -79,14 +146,12 @@ export default async function HomePage() {
                 </h1>
 
                 <p className="mt-8 max-w-[680px] text-[18px] leading-8 text-black/60 lg:text-[19px]">
-                  Attrezzatura foto,
-                  video e live selezionata
-                  per produzioni reali.
-                  Componi il tuo kit e
-                  inviaci le date: la
-                  disponibilità viene
-                  verificata prima della
-                  conferma.
+                  Noleggio di videocamere,
+                  ottiche, audio, luci e
+                  attrezzatura professionale
+                  a Palestrina, Roma Est e Roma
+                  per produzioni, shooting,
+                  eventi e live.
                 </p>
 
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -565,7 +630,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 
