@@ -56,6 +56,12 @@ type UnitStatus =
 
 
 
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
 type Product = {
 
   id: number;
@@ -74,6 +80,11 @@ type Product = {
 
     | string
 
+    | null;
+
+  categories:
+    | Category
+    | Category[]
     | null;
 
 };
@@ -131,6 +142,8 @@ type InventoryUnit = {
 type SearchParams = {
 
   q?: string;
+
+  categoria?: string;
 
   stato?: string;
 
@@ -192,6 +205,31 @@ function getProduct(
 
 
 
+
+
+function getCategory(
+  value:
+    | Category
+    | Category[]
+    | null
+) {
+  if (!value) {
+    return null;
+  }
+
+  if (
+    Array.isArray(
+      value
+    )
+  ) {
+    return (
+      value[0] ??
+      null
+    );
+  }
+
+  return value;
+}
 
 
 function statusLabel(
@@ -566,7 +604,17 @@ export default async function AdminInventoryPage({
 
             slug,
 
-            image_url
+            image_url,
+
+            categories (
+
+              id,
+
+              name,
+
+              slug
+
+            )
 
           )
 
@@ -614,6 +662,57 @@ export default async function AdminInventoryPage({
 
       InventoryUnit[];
 
+  units.sort(
+    (
+      a,
+      b
+    ) => {
+      const productA =
+        getProduct(
+          a.products
+        );
+
+      const productB =
+        getProduct(
+          b.products
+        );
+
+      const byProduct =
+        (
+          productA?.name ??
+          ""
+        ).localeCompare(
+          productB?.name ??
+          "",
+          "it",
+          {
+            sensitivity:
+              "base",
+            numeric:
+              true,
+          }
+        );
+
+      if (
+        byProduct !==
+        0
+      ) {
+        return byProduct;
+      }
+
+      return a.asset_code.localeCompare(
+        b.asset_code,
+        "it",
+        {
+          sensitivity:
+            "base",
+          numeric:
+            true,
+        }
+      );
+    }
+  );
+
 
 
 
@@ -651,6 +750,12 @@ export default async function AdminInventoryPage({
       .toLowerCase();
 
 
+
+  const categoryFilter =
+
+    params.categoria ??
+
+    "tutte";
 
   const status =
 
@@ -744,6 +849,13 @@ export default async function AdminInventoryPage({
 
 
 
+        const category =
+          product
+            ? getCategory(
+                product.categories
+              )
+            : null;
+
         const searchable =
 
           [
@@ -757,6 +869,8 @@ export default async function AdminInventoryPage({
             product?.name,
 
             product?.slug,
+
+            category?.name,
 
           ]
 
@@ -788,6 +902,18 @@ export default async function AdminInventoryPage({
 
 
 
+        const categoryOk =
+
+          categoryFilter ===
+
+            "tutte" ||
+
+          category?.slug ===
+
+            categoryFilter;
+
+
+
         const statusOk =
 
           status ===
@@ -805,6 +931,8 @@ export default async function AdminInventoryPage({
         return (
 
           queryOk &&
+
+          categoryOk &&
 
           statusOk
 
@@ -964,13 +1092,13 @@ export default async function AdminInventoryPage({
 
                   <Link
 
-                    href="/admin"
+                    href="/admin/prodotti"
 
-                    className="flex h-[58px] items-center justify-center rounded-[16px] border border-black/10 bg-[#f1f0ea] px-6 text-[15px] font-semibold text-black/60 transition hover:border-black/25 hover:bg-white hover:text-black"
+                    className="flex h-[58px] items-center justify-center rounded-[16px] border border-black/10 bg-white px-6 text-[15px] font-semibold text-black/60 transition hover:border-[#ff5a1f]/25 hover:bg-[#fff0e9] hover:text-[#e94b12]"
 
                   >
 
-                    ← Dashboard
+                    Prodotti
 
                   </Link>
 
@@ -1224,7 +1352,7 @@ export default async function AdminInventoryPage({
 
             method="get"
 
-            className="grid gap-3 p-5 lg:grid-cols-[1fr_240px_auto]"
+            className="grid gap-3 p-5 lg:grid-cols-[minmax(0,1fr)_220px_220px_auto]"
 
           >
 
@@ -1271,6 +1399,133 @@ export default async function AdminInventoryPage({
             </div>
 
 
+
+
+
+            {/* CATEGORY */}
+
+
+
+            <select
+
+              name="categoria"
+
+              defaultValue={
+
+                categoryFilter
+
+              }
+
+              className="h-[58px] rounded-[16px] border border-black/10 bg-[#f5f4ef] px-4 text-[15px] font-semibold outline-none transition focus:border-[#ff5a1f]/45 focus:bg-white"
+
+            >
+
+              <option value="tutte">
+
+                Tutte le categorie
+
+              </option>
+
+
+
+              {Array.from(
+
+                new Map(
+
+                  units
+
+                    .map(
+
+                      (
+                        unit
+                      ) => {
+                        const product =
+                          getProduct(
+                            unit.products
+                          );
+
+                        return product
+                          ? getCategory(
+                              product.categories
+                            )
+                          : null;
+                      }
+                    )
+
+                    .filter(
+
+                      (
+                        category
+                      ): category is Category =>
+                        Boolean(
+                          category
+                        )
+
+                    )
+
+                    .map(
+
+                      (
+                        category
+                      ) => [
+
+                        category.slug,
+
+                        category,
+
+                      ]
+
+                    )
+
+                ).values()
+
+              )
+
+                .sort(
+
+                  (
+                    a,
+                    b
+                  ) =>
+                    a.name.localeCompare(
+                      b.name,
+                      "it",
+                      {
+                        sensitivity:
+                          "base",
+                      }
+                    )
+                )
+
+                .map(
+
+                  (
+                    category
+                  ) => (
+
+                    <option
+
+                      key={
+                        category.id
+                      }
+
+                      value={
+                        category.slug
+                      }
+
+                    >
+
+                      {
+                        category.name
+                      }
+
+                    </option>
+
+                  )
+
+                )}
+
+            </select>
 
 
 
@@ -1349,6 +1604,10 @@ export default async function AdminInventoryPage({
 
 
           {(query ||
+
+            categoryFilter !==
+
+              "tutte" ||
 
             status !==
 
