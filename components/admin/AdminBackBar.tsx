@@ -43,6 +43,10 @@ function getParentLabel(parentPath: string | null) {
     return "Categorie";
   }
 
+  if (parentPath === "/admin/calendario") {
+    return "Calendario";
+  }
+
   if (parentPath === "/admin/utenti") {
     return "Utenti";
   }
