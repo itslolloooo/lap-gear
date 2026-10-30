@@ -4,546 +4,684 @@ import { redirect } from "next/navigation";
 import AdminLogoutButton from "@/components/AdminLogoutButton";
 import { MaterialStatsServer } from "@/components/admin/MaterialStatsServer";
 
-import {
-  requireAdminAccess,
-} from "@/lib/admin-auth";
+import { requireAdminAccess } from "@/lib/admin-auth";
+import { getServerSupabase } from "@/lib/supabase-server";
 
-export const dynamic =
-  "force-dynamic";
+export const dynamic = "force-dynamic";
+
+type ReservationStatus =
+  | "requested"
+  | "confirmed"
+  | "picked_up"
+  | "returned"
+  | "cancelled";
+
+type Reservation = {
+  id: string;
+  reference: string;
+  start_date: string;
+  end_date: string;
+  status: ReservationStatus;
+  quote_sent_at: string | null;
+  customers:
+    | { name: string }
+    | { name: string }[]
+    | null;
+  reservation_items:
+    | {
+        quantity: number;
+        products:
+          | { name: string }
+          | { name: string }[]
+          | null;
+      }[]
+    | null;
+};
+
+function first<T>(value: T | T[] | null) {
+  if (!value) return null;
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(`${value}T00:00:00`));
+}
+
+function money(value: number) {
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function statusLabel(status: ReservationStatus) {
+  switch (status) {
+    case "requested":
+      return "Da gestire";
+    case "confirmed":
+      return "Confermata";
+    case "picked_up":
+      return "In corso";
+    case "returned":
+      return "Restituita";
+    case "cancelled":
+      return "Annullata";
+  }
+}
+
+function statusClasses(status: ReservationStatus) {
+  switch (status) {
+    case "requested":
+      return "bg-[#fff2d5] text-[#8a650f]";
+    case "confirmed":
+      return "bg-[#edf2ff] text-[#245bff]";
+    case "picked_up":
+      return "bg-[#e9f6ee] text-[#168a50]";
+    case "returned":
+      return "bg-[#eeeeea] text-black/45";
+    case "cancelled":
+      return "bg-[#fff0ee] text-[#b7352b]";
+  }
+}
 
 export default async function AdminPage() {
-  const access =
-    await requireAdminAccess([
-      "admin",
-      "operator",
-      "viewer",
-    ]);
+  const access = await requireAdminAccess([
+    "admin",
+    "operator",
+    "viewer",
+  ]);
 
   if (!access) {
-    redirect(
-      "/admin/login"
-    );
+    redirect("/admin/login");
   }
 
-  const {
-    user,
-    profile,
-  } = access;
+  const { user, profile } = access;
 
-  const isAdmin =
-    profile.role ===
-    "admin";
-
+  const isAdmin = profile.role === "admin";
   const canManagePayments =
-    profile.role ===
-      "admin" ||
-    profile.role ===
-      "operator";
+    profile.role === "admin" ||
+    profile.role === "operator";
 
   const roleLabel =
-    profile.role ===
-      "admin"
+    profile.role === "admin"
       ? "Admin"
-      : profile.role ===
-          "operator"
+      : profile.role === "operator"
         ? "Operatore"
         : "Viewer";
 
+  const supabase = getServerSupabase();
+
+  if (!supabase) {
+    throw new Error("Supabase non configurato.");
+  }
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+  const monthStart = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
+
+  const nextMonthStart = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    1
+  );
+
+  const monthStartIso = monthStart.toISOString();
+  const nextMonthStartIso = nextMonthStart.toISOString();
+
+  const [
+    reservationsResult,
+    unitsResult,
+    paymentsResult,
+  ] = await Promise.all([
+    supabase
+      .from("reservations")
+      .select(`
+        id,
+        reference,
+        start_date,
+        end_date,
+        status,
+        quote_sent_at,
+        customers (
+          name
+        ),
+        reservation_items (
+          quantity,
+          products (
+            name
+          )
+        )
+      `)
+      .neq("status", "cancelled")
+      .order("start_date", { ascending: true }),
+
+    supabase
+      .from("product_units")
+      .select("id,status"),
+
+    supabase
+      .from("reservation_payments")
+      .select("amount,paid_at")
+      .gte("paid_at", monthStartIso)
+      .lt("paid_at", nextMonthStartIso),
+  ]);
+
+  const reservations =
+    (reservationsResult.data ?? []) as unknown as Reservation[];
+
+  const units =
+    unitsResult.data ?? [];
+
+  const monthPayments =
+    paymentsResult.data ?? [];
+
+  const todo = reservations.filter(
+    (reservation) =>
+      reservation.status === "requested" &&
+      !reservation.quote_sent_at
+  ).length;
+
+  const confirmed = reservations.filter(
+    (reservation) =>
+      reservation.status === "confirmed"
+  ).length;
+
+  const outNow = reservations.filter(
+    (reservation) =>
+      reservation.status === "picked_up"
+  ).length;
+
+  const maintenance = units.filter(
+    (unit) =>
+      unit.status === "maintenance"
+  ).length;
+
+  const monthNet = monthPayments.reduce(
+    (sum, payment) =>
+      sum + Number(payment.amount ?? 0),
+    0
+  );
+
+  const upcoming = reservations
+    .filter(
+      (reservation) =>
+        reservation.status !== "returned" &&
+        reservation.end_date >= todayKey
+    )
+    .slice(0, 6);
+
+  const quickLinks = [
+    {
+      href: "/admin/richieste",
+      eyebrow: "Rental",
+      title: "Richieste",
+      description: "Preventivi, conferme, consegne e rientri.",
+      featured: true,
+    },
+    {
+      href: "/admin/calendario",
+      eyebrow: "Planning",
+      title: "Calendario",
+      description: "Tutti i noleggi ordinati per giorno.",
+      featured: false,
+    },
+    {
+      href: "/admin/inventario",
+      eyebrow: "Gear",
+      title: "Inventario",
+      description: "Unità fisiche, seriali e manutenzione.",
+      featured: false,
+    },
+    {
+      href: "/admin/prodotti",
+      eyebrow: "Catalogo",
+      title: "Prodotti",
+      description: "Schede, prezzi e disponibilità.",
+      featured: false,
+    },
+  ];
+
   return (
-    <main className="min-h-screen bg-[#ebeae4] px-5 py-8 text-[#111111] sm:px-8 lg:px-12">
+    <main className="min-h-screen bg-[#ebeae4] px-4 pb-16 pt-5 text-[#111111] sm:px-6 lg:px-8 xl:px-10">
       <div className="mx-auto max-w-[1680px]">
-
-        {/* =====================================================
-            HERO
-            ===================================================== */}
-
-        <section className="overflow-hidden rounded-[30px] border border-black/10 bg-white shadow-[0_20px_65px_rgba(0,0,0,0.07)]">
-          <div className="grid xl:grid-cols-[1fr_390px]">
-
-            {/* LEFT */}
-
-            <div className="relative overflow-hidden p-8 sm:p-10 lg:p-14">
-              <div className="pointer-events-none absolute -right-32 -top-40 h-[420px] w-[420px] rounded-full bg-[#ff5a1f]/[0.08]" />
-
-              <div className="pointer-events-none absolute -bottom-48 right-[17%] h-[330px] w-[330px] rounded-full border-[62px] border-black/[0.025]" />
-
-              <div className="relative">
-                <div className="inline-flex items-center gap-2.5 rounded-full bg-[#fff0e9] px-4 py-2 text-[13px] font-bold uppercase tracking-[0.12em] text-[#e94b12]">
-                  <span className="h-2 w-2 rounded-full bg-[#ff5a1f]" />
-
-                  LAP GEAR / Admin
-                </div>
-
-                <h1 className="mt-7 max-w-[900px] text-[58px] font-semibold leading-[0.89] tracking-[-0.065em] sm:text-[76px] lg:text-[92px]">
-                  Gestisci
-                  <br />
-
-                  <span className="text-[#ff5a1f]">
-                    il gear.
-                  </span>
-                </h1>
-
-                <p className="mt-7 max-w-[700px] text-[18px] leading-8 text-black/60">
-                  Catalogo, unità fisiche,
-                  disponibilità e richieste
-                  di noleggio in un unico
-                  pannello operativo.
-                </p>
-
-                <div className="mt-10 flex flex-col gap-5 border-t border-black/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="text-[13px] font-bold uppercase tracking-[0.09em] text-black/40">
-                      Sessione attiva
-                    </div>
-
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <span className="text-[16px] font-semibold">
-                        {user.email}
-                      </span>
-
-                      <span className="rounded-full bg-[#fff0e9] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#ff5a1f]">
-                        {roleLabel}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="
-                      [&_button]:h-12
-                      [&_button]:rounded-[14px]
-                      [&_button]:border
-                      [&_button]:border-black/10
-                      [&_button]:bg-[#f3f2ed]
-                      [&_button]:px-5
-                      [&_button]:text-[14px]
-                      [&_button]:font-semibold
-                      [&_button]:text-black/60
-                      [&_button]:transition
-                      [&_button:hover]:border-black/25
-                      [&_button:hover]:bg-[#151515]
-                      [&_button:hover]:text-white
-                    "
-                  >
-                    <AdminLogoutButton />
-                  </div>
-                </div>
-              </div>
+        <header className="flex flex-col gap-4 rounded-[24px] border border-black/10 bg-white px-5 py-5 shadow-[0_10px_35px_rgba(0,0,0,0.035)] sm:px-7 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[13px] bg-[#181818] text-[13px] font-bold tracking-[-0.02em] text-white">
+              LAP
             </div>
 
-            {/* RIGHT */}
-
-            <div className="relative flex min-h-[330px] flex-col justify-between overflow-hidden bg-[#181818] p-8 text-white sm:p-10">
-              <div className="pointer-events-none absolute -right-24 -top-24 h-[260px] w-[260px] rounded-full bg-[#ff5a1f]/20" />
-
-              <div className="relative">
-                <div className="flex items-center gap-3 text-[13px] font-bold uppercase tracking-[0.11em] text-white/50">
-                  <span className="h-2.5 w-2.5 rounded-full bg-[#1ab36b]" />
-
-                  Sistema operativo
-                </div>
-
-                <div className="mt-9 text-[40px] font-semibold leading-[0.96] tracking-[-0.055em]">
-                  Rental
-                  <br />
-                  Control.
-                </div>
-
-                <div className="mt-6 h-1.5 w-16 rounded-full bg-[#ff5a1f]" />
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ff5a1f]">
+                Rental control
               </div>
-
-              <div className="relative mt-16 grid grid-cols-2 gap-3">
-                <MiniStatus
-                  number="01"
-                  label="Catalogo"
-                />
-
-                <MiniStatus
-                  number="02"
-                  label="Inventario"
-                />
-
-                <MiniStatus
-                  number="03"
-                  label="Richieste"
-                />
-
-                <MiniStatus
-                  number="04"
-                  label="Disponibilità"
-                />
+              <div className="mt-0.5 text-[24px] font-semibold tracking-[-0.04em]">
+                Dashboard
               </div>
             </div>
           </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="hidden text-right sm:block">
+              <div className="max-w-[280px] truncate text-[12px] font-semibold text-black/55">
+                {user.email}
+              </div>
+              <div className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-black/25">
+                {roleLabel}
+              </div>
+            </div>
+
+            <div
+              className="
+                [&_button]:h-10
+                [&_button]:rounded-[12px]
+                [&_button]:border
+                [&_button]:border-black/10
+                [&_button]:bg-[#f4f3ee]
+                [&_button]:px-4
+                [&_button]:text-[12px]
+                [&_button]:font-semibold
+                [&_button]:text-black/55
+                [&_button]:transition
+                [&_button:hover]:bg-[#181818]
+                [&_button:hover]:text-white
+              "
+            >
+              <AdminLogoutButton />
+            </div>
+          </div>
+        </header>
+
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <KpiCard
+            label="Da gestire"
+            value={String(todo)}
+            hint="richieste senza preventivo"
+            href="/admin/richieste?vista=da-gestire"
+            warning={todo > 0}
+          />
+
+          <KpiCard
+            label="Confermate"
+            value={String(confirmed)}
+            hint="noleggi da preparare"
+            href="/admin/richieste?vista=confermate"
+          />
+
+          <KpiCard
+            label="Materiale fuori"
+            value={String(outNow)}
+            hint="noleggi in corso"
+            href="/admin/richieste?vista=in-corso"
+            accent
+          />
+
+          <KpiCard
+            label="Manutenzione"
+            value={String(maintenance)}
+            hint="unità da controllare"
+            href="/admin/inventario?stato=maintenance"
+            warning={maintenance > 0}
+          />
+
+          {canManagePayments ? (
+            <KpiCard
+              label="Incassato mese"
+              value={money(monthNet)}
+              hint="netto pagamenti registrati"
+              href="/admin/pagamenti"
+              accent
+            />
+          ) : (
+            <KpiCard
+              label="Unità fisiche"
+              value={String(units.length)}
+              hint="inventario totale"
+              href="/admin/inventario"
+            />
+          )}
         </section>
 
-        {/* =====================================================
-            OPERATIONS
-            ===================================================== */}
-
-        <section className="py-12">
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#ff5a1f]">
-                Operazioni
+        <section className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,.55fr)]">
+          <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
+            <div className="flex flex-col gap-3 border-b border-black/10 bg-[#fbfaf7] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+                  Agenda operativa
+                </div>
+                <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em]">
+                  Prossimi noleggi
+                </div>
               </div>
 
-              <h2 className="mt-2 text-[42px] font-semibold tracking-[-0.05em] sm:text-[52px]">
-                Cosa vuoi gestire?
-              </h2>
+              <Link
+                href="/admin/calendario"
+                className="text-[12px] font-semibold text-black/40 transition hover:text-[#ff5a1f]"
+              >
+                Apri calendario →
+              </Link>
             </div>
 
-            <div className="max-w-[420px] text-[15px] leading-7 text-black/50">
-              Tutto il flusso del
-              noleggio, dal prodotto
-              alla singola unità fisica.
-            </div>
+            {upcoming.length === 0 ? (
+              <div className="p-8 text-[13px] text-black/35">
+                Nessun noleggio attivo o futuro.
+              </div>
+            ) : (
+              <div className="divide-y divide-black/10">
+                {upcoming.map((reservation) => {
+                  const customer = first(reservation.customers);
+                  const items = reservation.reservation_items ?? [];
+                  const material = items
+                    .map((item) => {
+                      const product = first(item.products);
+                      return product
+                        ? `${item.quantity}× ${product.name}`
+                        : null;
+                    })
+                    .filter(Boolean)
+                    .slice(0, 3)
+                    .join(" · ");
+
+                  return (
+                    <Link
+                      key={reservation.id}
+                      href={`/admin/richieste/${reservation.id}`}
+                      className="grid gap-3 px-5 py-4 transition hover:bg-[#fbfaf7] sm:px-6 lg:grid-cols-[150px_minmax(180px,.8fr)_minmax(0,1.3fr)_130px_24px] lg:items-center"
+                    >
+                      <div>
+                        <div className="font-mono text-[11px] font-semibold text-black/50">
+                          {reservation.reference}
+                        </div>
+                        <div className="mt-1 text-[11px] text-black/30">
+                          {formatDate(reservation.start_date)} → {formatDate(reservation.end_date)}
+                        </div>
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="truncate text-[13px] font-semibold">
+                          {customer?.name ?? "Cliente"}
+                        </div>
+                      </div>
+
+                      <div className="min-w-0 truncate text-[11px] text-black/40">
+                        {material || "Nessun materiale"}
+                      </div>
+
+                      <div>
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.05em] ${statusClasses(
+                            reservation.status
+                          )}`}
+                        >
+                          {statusLabel(reservation.status)}
+                        </span>
+                      </div>
+
+                      <div className="text-right text-[16px] text-black/20">
+                        →
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          <div
-            className={`grid gap-5 ${
-              isAdmin
-                ? "lg:grid-cols-6"
-                : canManagePayments
-                  ? "lg:grid-cols-5"
-                  : "lg:grid-cols-4"
-            }`}
-          >
-            <AdminCard
-              href="/admin/prodotti"
-              number="01"
-              eyebrow="Catalogo"
-              title="Prodotti"
-              description={
-                isAdmin
-                  ? "Schede prodotto, tariffe, immagini e dati tecnici."
-                  : "Consulta catalogo, tariffe e dati tecnici."
-              }
-            />
+          <div className="space-y-5">
+            <section className="rounded-[24px] bg-[#181818] p-6 text-white sm:p-7">
+              <div className="text-[10px] font-bold uppercase tracking-[0.11em] text-[#ff7b4a]">
+                Oggi
+              </div>
 
-            <AdminCard
-              href="/admin/inventario"
-              number="02"
-              eyebrow="Gear fisico"
-              title="Inventario"
-              description={
-                profile.role === "viewer"
-                  ? "Consulta unità fisiche, seriali e stato operativo."
-                  : "Unità fisiche, seriali, manutenzione e disponibilità."
-              }
-            />
+              <div className="mt-2 text-[32px] font-semibold tracking-[-0.05em]">
+                {new Intl.DateTimeFormat("it-IT", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                }).format(today)}
+              </div>
 
-            <AdminCard
-              href="/admin/richieste"
-              number="03"
-              eyebrow="Rental"
-              title="Richieste"
-              description={
-                profile.role ===
-                "viewer"
-                  ? "Consulta clienti, date, materiale e stato dei noleggi."
-                  : "Clienti, date, preparazione kit e stato dei noleggi."
-              }
-              featured
-            />
+              <div className="mt-7 grid grid-cols-2 gap-3">
+                <DarkMiniStat
+                  label="Da gestire"
+                  value={todo}
+                />
+                <DarkMiniStat
+                  label="Fuori"
+                  value={outNow}
+                />
+                <DarkMiniStat
+                  label="Confermati"
+                  value={confirmed}
+                />
+                <DarkMiniStat
+                  label="Manutenzione"
+                  value={maintenance}
+                />
+              </div>
 
-            <AdminCard
-              href="/admin/calendario"
-              number="04"
-              eyebrow="Planning"
-              title="Calendario"
-              description="Tutti i noleggi distribuiti per giorno, dal ritiro al rientro."
-            />
+              <Link
+                href="/admin/richieste"
+                className="mt-5 flex h-[46px] items-center justify-center rounded-[13px] bg-white text-[12px] font-semibold text-[#181818] transition hover:bg-[#ff5a1f] hover:text-white"
+              >
+                Gestisci richieste
+              </Link>
+            </section>
 
             {canManagePayments && (
-              <AdminCard
-                href="/admin/pagamenti"
-                number="05"
-                eyebrow="Finance"
-                title="Pagamenti"
-                description="Incassi, acconti, rimborsi, storico e statistiche."
-              />
-            )}
-
-            {isAdmin && (
-              <AdminCard
-                href="/admin/utenti"
-                number="06"
-                eyebrow="Accessi"
-                title="Utenti"
-                description="Account staff, ruoli e autorizzazioni."
-              />
-            )}
-          </div>
-        </section>
-
-        <MaterialStatsServer />
-
-        {/* =====================================================
-            WORKFLOW
-            ===================================================== */}
-
-        <section className="mb-10 overflow-hidden rounded-[28px] bg-[#181818] text-white">
-          <div className="grid lg:grid-cols-[350px_1fr]">
-
-            <div className="relative overflow-hidden border-b border-white/10 p-8 sm:p-9 lg:border-b-0 lg:border-r">
-              <div className="pointer-events-none absolute -bottom-24 -left-24 h-[220px] w-[220px] rounded-full bg-[#ff5a1f]/20" />
-
-              <div className="relative">
-                <div className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#ff7b4a]">
-                  Workflow
+              <section className="rounded-[24px] border border-black/10 bg-white p-6">
+                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+                  Finance
                 </div>
 
-                <h2 className="mt-4 text-[34px] font-semibold leading-[1.02] tracking-[-0.05em]">
-                  Dal kit
-                  <br />
-                  al rientro.
-                </h2>
+                <div className="mt-2 text-[31px] font-semibold tracking-[-0.05em]">
+                  {money(monthNet)}
+                </div>
 
-                <p className="mt-5 max-w-[260px] text-[14px] leading-6 text-white/50">
-                  Un unico flusso per
-                  gestire materiale e
-                  noleggi senza perdere
-                  il controllo.
-                </p>
-              </div>
-            </div>
+                <div className="mt-1 text-[11px] text-black/35">
+                  netto registrato questo mese
+                </div>
 
-            <div className="grid sm:grid-cols-2 xl:grid-cols-4">
-              <FlowStep
-                number="01"
-                title="Richiesta"
-                text="Il cliente compone il kit."
-              />
-
-              <FlowStep
-                number="02"
-                title="Verifica"
-                text="Controlli date e disponibilità."
-              />
-
-              <FlowStep
-                number="03"
-                title="Consegna"
-                text="Assegni le unità fisiche."
-              />
-
-              <FlowStep
-                number="04"
-                title="Rientro"
-                text="Chiudi il noleggio."
-              />
-            </div>
+                <Link
+                  href="/admin/pagamenti"
+                  className="mt-5 inline-flex text-[12px] font-semibold text-black/45 transition hover:text-[#ff5a1f]"
+                >
+                  Vedi statistiche →
+                </Link>
+              </section>
+            )}
           </div>
         </section>
+
+        <section className="mt-5">
+          <div className="mb-3 flex items-end justify-between px-1">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-black/30">
+                Moduli
+              </div>
+              <div className="mt-1 text-[22px] font-semibold tracking-[-0.035em]">
+                Accesso rapido
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {quickLinks.map((link) => (
+              <QuickModule
+                key={link.href}
+                {...link}
+              />
+            ))}
+          </div>
+
+          {(canManagePayments || isAdmin) && (
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {canManagePayments && (
+                <SmallModule
+                  href="/admin/pagamenti"
+                  label="Pagamenti"
+                  text="Incassi, rimborsi e statistiche economiche."
+                />
+              )}
+
+              {isAdmin && (
+                <SmallModule
+                  href="/admin/utenti"
+                  label="Utenti"
+                  text="Ruoli e autorizzazioni dello staff."
+                />
+              )}
+            </div>
+          )}
+        </section>
+
+        <div className="mt-10">
+          <MaterialStatsServer />
+        </div>
       </div>
     </main>
   );
 }
 
-
-/* =========================================================
-   ADMIN CARD
-   ========================================================= */
-
-function AdminCard({
+function KpiCard({
+  label,
+  value,
+  hint,
   href,
-  number,
-  eyebrow,
-  title,
-  description,
-  featured = false,
+  accent = false,
+  warning = false,
 }: {
+  label: string;
+  value: string;
+  hint: string;
   href: string;
-  number: string;
-  eyebrow: string;
-  title: string;
-  description: string;
-  featured?: boolean;
+  accent?: boolean;
+  warning?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className={`
-        group
-        relative
-        flex
-        min-h-[370px]
-        flex-col
-        overflow-hidden
-        rounded-[27px]
-        border
-        transition
-        duration-300
-        hover:-translate-y-1
-        hover:shadow-[0_25px_65px_rgba(0,0,0,0.09)]
-
-        ${
-          featured
-            ? "border-[#ff5a1f]/20 bg-[#fff2ec]"
-            : "border-black/10 bg-white hover:border-[#ff5a1f]/35"
-        }
-      `}
+      className={`rounded-[20px] border p-4 transition hover:-translate-y-[1px] hover:shadow-[0_10px_28px_rgba(0,0,0,0.05)] ${
+        accent
+          ? "border-[#168a50]/15 bg-[#e9f6ee]"
+          : warning
+            ? "border-[#d98a08]/15 bg-[#fff2d5]"
+            : "border-black/10 bg-white"
+      }`}
     >
-      {/* accent line */}
-
-      <div
-        className={`
-          h-[6px]
-          w-full
-          transition
-          duration-300
-
-          ${
-            featured
-              ? "bg-[#ff5a1f]"
-              : "bg-[#181818] group-hover:bg-[#ff5a1f]"
-          }
-        `}
-      />
-
-      <div className="flex flex-1 flex-col justify-between p-7 sm:p-8">
-        <div className="flex items-start justify-between">
-          <div
-            className={`
-              flex
-              h-12
-              w-12
-              items-center
-              justify-center
-              rounded-full
-              text-[13px]
-              font-bold
-
-              ${
-                featured
-                  ? "bg-[#ff5a1f] text-white"
-                  : "bg-[#efeee8] text-black/55"
-              }
-            `}
-          >
-            {number}
-          </div>
-
-          <div
-            className={`
-              flex
-              h-12
-              w-12
-              items-center
-              justify-center
-              rounded-full
-              text-[21px]
-              transition
-              duration-300
-              group-hover:bg-[#ff5a1f]
-              group-hover:text-white
-
-              ${
-                featured
-                  ? "bg-white text-[#ff5a1f]"
-                  : "bg-[#efeee8] text-black/55"
-              }
-            `}
-          >
-            ↗
-          </div>
-        </div>
-
-        <div className="mt-16">
-          <div className="text-[13px] font-bold uppercase tracking-[0.11em] text-[#ff5a1f]">
-            {eyebrow}
-          </div>
-
-          <h3 className="mt-2 text-[42px] font-semibold leading-none tracking-[-0.055em]">
-            {title}
-          </h3>
-
-          <p className="mt-5 max-w-[420px] text-[16px] leading-7 text-black/58">
-            {description}
-          </p>
-
-          <div
-            className={`
-              mt-8
-              flex
-              items-center
-              justify-between
-              border-t
-              pt-5
-
-              ${
-                featured
-                  ? "border-[#ff5a1f]/15"
-                  : "border-black/10"
-              }
-            `}
-          >
-            <span className="text-[13px] font-bold uppercase tracking-[0.08em] text-black/40">
-              LAP GEAR
-            </span>
-
-            <span className="text-[14px] font-semibold">
-              Apri →
-            </span>
-          </div>
-        </div>
+      <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-black/30">
+        {label}
+      </div>
+      <div className="mt-2 text-[30px] font-semibold leading-none tracking-[-0.05em]">
+        {value}
+      </div>
+      <div className="mt-2 text-[10px] text-black/35">
+        {hint}
       </div>
     </Link>
   );
 }
 
-
-/* =========================================================
-   MINI STATUS
-   ========================================================= */
-
-function MiniStatus({
-  number,
+function DarkMiniStat({
   label,
+  value,
 }: {
-  number: string;
   label: string;
+  value: number;
 }) {
   return (
-    <div className="rounded-[16px] border border-white/10 bg-white/[0.065] p-4">
-      <div className="text-[12px] font-bold text-[#ff7b4a]">
-        {number}
-      </div>
-
-      <div className="mt-2 text-[14px] font-semibold text-white/80">
+    <div className="rounded-[14px] bg-white/[0.07] px-4 py-3">
+      <div className="text-[9px] font-bold uppercase tracking-[0.07em] text-white/30">
         {label}
+      </div>
+      <div className="mt-1 text-[20px] font-semibold">
+        {value}
       </div>
     </div>
   );
 }
 
-
-/* =========================================================
-   FLOW
-   ========================================================= */
-
-function FlowStep({
-  number,
+function QuickModule({
+  href,
+  eyebrow,
   title,
+  description,
+  featured,
+}: {
+  href: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  featured: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group rounded-[22px] border p-5 transition hover:-translate-y-[2px] hover:shadow-[0_14px_35px_rgba(0,0,0,0.06)] ${
+        featured
+          ? "border-[#ff5a1f]/20 bg-[#fff0e9]"
+          : "border-black/10 bg-white"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-[#ff5a1f]">
+            {eyebrow}
+          </div>
+          <div className="mt-1 text-[24px] font-semibold tracking-[-0.04em]">
+            {title}
+          </div>
+        </div>
+
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f1f0ea] text-[15px] transition group-hover:bg-[#181818] group-hover:text-white">
+          ↗
+        </div>
+      </div>
+
+      <p className="mt-4 text-[12px] leading-5 text-black/40">
+        {description}
+      </p>
+    </Link>
+  );
+}
+
+function SmallModule({
+  href,
+  label,
   text,
 }: {
-  number: string;
-  title: string;
+  href: string;
+  label: string;
   text: string;
 }) {
   return (
-    <div className="border-b border-white/10 p-7 last:border-b-0 sm:[&:nth-child(odd)]:border-r xl:border-b-0 xl:border-r xl:last:border-r-0">
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#ff5a1f]/15 text-[12px] font-bold text-[#ff7b4a]">
-        {number}
+    <Link
+      href={href}
+      className="flex items-center justify-between gap-5 rounded-[18px] border border-black/10 bg-white px-5 py-4 transition hover:border-[#ff5a1f]/25"
+    >
+      <div>
+        <div className="text-[13px] font-semibold">
+          {label}
+        </div>
+        <div className="mt-1 text-[11px] text-black/35">
+          {text}
+        </div>
       </div>
 
-      <div className="mt-6 text-[20px] font-semibold">
-        {title}
+      <div className="text-[16px] text-black/25">
+        →
       </div>
-
-      <p className="mt-2 text-[14px] leading-6 text-white/50">
-        {text}
-      </p>
-    </div>
+    </Link>
   );
 }
