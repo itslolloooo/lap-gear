@@ -251,6 +251,13 @@ export default async function AdminPage() {
       description: "Schede, prezzi e disponibilità.",
       featured: false,
     },
+    {
+      href: "/admin/kit",
+      eyebrow: "Catalogo",
+      title: "Kit pronti",
+      description: "Crea e gestisci configurazioni di prodotti.",
+      featured: false,
+    },
   ];
 
   return (
@@ -516,7 +523,7 @@ export default async function AdminPage() {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {quickLinks.map((link) => (
               <QuickModule
                 key={link.href}
