@@ -21,7 +21,13 @@ export const dynamic =
   "force-dynamic";
 
 
-export default async function NewInventoryUnitPage() {
+export default async function NewInventoryUnitPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    product?: string;
+  }>;
+}) {
 
   /* =======================================================
      AUTH
@@ -101,6 +107,32 @@ export default async function NewInventoryUnitPage() {
       error.message
     );
   }
+
+  const params =
+    searchParams
+      ? await searchParams
+      : {};
+
+  const requestedProductId =
+    Number(
+      params.product ??
+      ""
+    );
+
+  const initialProductId =
+    Number.isInteger(
+      requestedProductId
+    ) &&
+    (
+      products ??
+      []
+    ).some(
+      (product) =>
+        product.id ===
+        requestedProductId
+    )
+      ? requestedProductId
+      : null;
 
 
   return (
@@ -214,7 +246,10 @@ export default async function NewInventoryUnitPage() {
             []
           }
           action="/api/admin/inventory"
-          submitLabel="Crea unità"
+          submitLabel="Aggiungi unità"
+          initialProductId={
+            initialProductId
+          }
         />
 
       </div>
