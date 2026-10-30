@@ -2226,7 +2226,9 @@ export async function POST(
     String(
       process.env
         .RENTAL_NOTIFICATION_EMAIL ??
-        ""
+      process.env
+        .QUOTE_BUSINESS_EMAIL ??
+      "info@lapgear.it"
     ).trim();
 
   const emailTasks:
