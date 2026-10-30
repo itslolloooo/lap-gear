@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "./globals.css";
 import { RentalProvider } from "@/components/RentalProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -8,8 +7,25 @@ import { LegalFooter } from "@/components/LegalFooter";
 
 
 export const metadata: Metadata = {
-  title: "LAP Gear · Noleggio attrezzatura foto video live",
-  description: "Noleggio attrezzatura professionale per foto, video, audio e produzioni live."
+  metadataBase: new URL("https://lapgear.it"),
+  title: {
+    default: "Noleggio attrezzatura video a Palestrina e Roma | LAP GEAR",
+    template: "%s | LAP GEAR",
+  },
+  description:
+    "Noleggio di videocamere, ottiche, audio, luci e attrezzatura professionale a Palestrina, Roma Est e Roma.",
+  applicationName: "LAP GEAR",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Noleggio attrezzatura video a Palestrina e Roma | LAP GEAR",
+    description:
+      "Noleggio di videocamere, ottiche, audio, luci e attrezzatura professionale a Palestrina, Roma Est e Roma.",
+    url: "https://lapgear.it",
+    siteName: "LAP GEAR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
