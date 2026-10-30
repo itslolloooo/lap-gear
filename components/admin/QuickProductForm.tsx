@@ -46,7 +46,7 @@ export function QuickProductForm({
       <input type="hidden" name="slug" value="" />
       <input type="hidden" name="deposit" value="0" />
       <input type="hidden" name="attributes_json" value="{}" />
-      <input type="hidden" name="active" value="true" />
+      <input type="hidden" name="active" value="false" />
       <input type="hidden" name="featured" value="false" />
 
       <div className="space-y-6">
@@ -286,9 +286,10 @@ export function QuickProductForm({
             </div>
             <div className="mt-3 space-y-2 text-[13px] leading-5 text-black/52">
               <div>✓ genera automaticamente lo slug</div>
-              <div>✓ crea la scheda prodotto</div>
+              <div>✓ crea la scheda prodotto come bozza</div>
               <div>✓ crea {quantity || "0"} unità di inventario</div>
-              <div>✓ genera i codici asset</div>
+              <div>✓ genera i codici asset
+              <div>✓ non pubblica il prodotto sul sito</div></div>
             </div>
           </div>
 
