@@ -61,6 +61,11 @@ function Header() {
     );
 
 
+  const kitsActive =
+    pathname.startsWith(
+      "/kit"
+    );
+
   const requestActive =
     pathname.startsWith(
       "/richiesta"
@@ -162,6 +167,15 @@ function Header() {
               }
             >
               Catalogo
+            </NavLink>
+
+            <NavLink
+              href="/kit"
+              active={
+                kitsActive
+              }
+            >
+              Kit pronti
             </NavLink>
 
             <NavLink
@@ -458,27 +472,34 @@ function Header() {
 
               <MobileNavLink
                 number="02"
+                href="/kit"
+                title="Kit pronti"
+                description="Configurazioni già preparate"
+              />
+
+              <MobileNavLink
+                number="03"
                 href="/#come-funziona"
                 title="Come funziona"
                 description="Dal kit alla conferma"
               />
 
               <MobileNavLink
-                number="03"
+                number="04"
                 href="/#contatti"
                 title="Contatti"
                 description="Parliamo del tuo progetto"
               />
 
               <MobileNavLink
-                number="04"
+                number="05"
                 href="/richiesta"
                 title="Stato richiesta"
                 description="Segui la tua richiesta di noleggio"
               />
 
               <MobileNavLink
-                number="05"
+                number="06"
                 href="/admin"
                 title="Area admin"
                 description="Gestione richieste e inventario"
