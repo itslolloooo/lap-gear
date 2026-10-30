@@ -72,6 +72,11 @@ function Footer() {
               />
 
               <FooterLink
+                href="/kit"
+                label="Kit pronti"
+              />
+
+              <FooterLink
                 href="/#come-funziona"
                 label="Come funziona"
               />
