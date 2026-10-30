@@ -18,14 +18,15 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/favicon.ico",
+        url: "/favicon.ppm",
+        type: "image/x-portable-pixmap",
+        sizes: "96x96",
       },
       {
         url: "/icon.svg",
         type: "image/svg+xml",
       },
     ],
-    shortcut: "/favicon.ico",
   },
   openGraph: {
     title: "Noleggio attrezzatura video a Palestrina e Roma | LAP GEAR",
