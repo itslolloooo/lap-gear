@@ -59,7 +59,7 @@ export async function POST(
       )
     );
 
-  const assetCode =
+  const requestedAssetCode =
     String(
       formData.get(
         "asset_code"
@@ -67,6 +67,18 @@ export async function POST(
     )
       .trim()
       .toUpperCase();
+
+  const quantityRaw =
+    formData.get(
+      "quantity"
+    );
+
+  const quantity =
+    quantityRaw === null
+      ? 1
+      : Number(
+          quantityRaw
+        );
 
   const serialNumber =
     String(
@@ -102,10 +114,14 @@ export async function POST(
 
   if (
     !productId ||
-    !assetCode ||
     !allowedStatuses.includes(
       status
-    )
+    ) ||
+    !Number.isInteger(
+      quantity
+    ) ||
+    quantity < 1 ||
+    quantity > 99
   ) {
     return NextResponse.json(
       {
@@ -138,27 +154,188 @@ export async function POST(
     );
   }
 
+  let unitsToInsert:
+    Array<{
+      product_id: number;
+      asset_code: string;
+      serial_number: string | null;
+      status: string;
+      notes: string | null;
+    }>;
+
+  if (
+    requestedAssetCode
+  ) {
+    unitsToInsert = [
+      {
+        product_id:
+          productId,
+
+        asset_code:
+          requestedAssetCode,
+
+        serial_number:
+          serialNumber ||
+          null,
+
+        status,
+
+        notes:
+          notes ||
+          null,
+      },
+    ];
+  } else {
+    const {
+      data:
+        existingUnits,
+      error:
+        existingUnitsError,
+    } =
+      await supabase
+        .from(
+          "product_units"
+        )
+        .select(
+          "asset_code"
+        )
+        .eq(
+          "product_id",
+          productId
+        );
+
+    if (
+      existingUnitsError
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            existingUnitsError.message,
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    const prefix =
+      `LAP-${String(
+        productId
+      ).padStart(
+        4,
+        "0"
+      )}-`;
+
+    const usedNumbers =
+      new Set(
+        (
+          existingUnits ??
+          []
+        )
+          .map(
+            (
+              unit
+            ) => {
+              const code =
+                String(
+                  unit.asset_code ??
+                  ""
+                );
+
+              if (
+                !code.startsWith(
+                  prefix
+                )
+              ) {
+                return null;
+              }
+
+              const suffix =
+                Number(
+                  code.slice(
+                    prefix.length
+                  )
+                );
+
+              return Number.isInteger(
+                suffix
+              ) &&
+                suffix > 0
+                ? suffix
+                : null;
+            }
+          )
+          .filter(
+            (
+              value
+            ): value is number =>
+              value !== null
+          )
+      );
+
+    const generatedCodes:
+      string[] = [];
+
+    let candidate =
+      1;
+
+    while (
+      generatedCodes.length <
+      quantity
+    ) {
+      if (
+        !usedNumbers.has(
+          candidate
+        )
+      ) {
+        generatedCodes.push(
+          `${prefix}${String(
+            candidate
+          ).padStart(
+            2,
+            "0"
+          )}`
+        );
+      }
+
+      candidate += 1;
+    }
+
+    unitsToInsert =
+      generatedCodes.map(
+        (
+          assetCode,
+          index
+        ) => ({
+          product_id:
+            productId,
+
+          asset_code:
+            assetCode,
+
+          serial_number:
+            quantity === 1 &&
+            index === 0 &&
+            serialNumber
+              ? serialNumber
+              : null,
+
+          status,
+
+          notes:
+            notes ||
+            null,
+        })
+      );
+  }
+
   const {
     error,
   } = await supabase
     .from("product_units")
-    .insert({
-      product_id:
-        productId,
-
-      asset_code:
-        assetCode,
-
-      serial_number:
-        serialNumber ||
-        null,
-
-      status,
-
-      notes:
-        notes ||
-        null,
-    });
+    .insert(
+      unitsToInsert
+    );
 
   if (error) {
     console.error(
