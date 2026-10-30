@@ -164,6 +164,8 @@ type SearchParams = {
 
   q?: string;
 
+  categoria?: string;
+
   stato?: string;
 
 };
@@ -665,6 +667,13 @@ export default async function AdminProductsPage({
 
 
 
+  const categoryFilter =
+
+    params.categoria ??
+
+    "tutte";
+
+
   const status =
 
     params.stato ??
@@ -822,6 +831,17 @@ export default async function AdminProductsPage({
           );
 
 
+        const categoryOk =
+
+          categoryFilter ===
+
+            "tutte" ||
+
+          category?.slug ===
+
+            categoryFilter;
+
+
 
         let statusOk =
 
@@ -884,6 +904,8 @@ export default async function AdminProductsPage({
         return (
 
           queryOk &&
+
+          categoryOk &&
 
           statusOk
 
@@ -1054,20 +1076,6 @@ export default async function AdminProductsPage({
                     </Link>
 
                   )}
-
-
-
-                  <Link
-
-                    href="/admin"
-
-                    className="flex h-[58px] items-center justify-center rounded-[16px] border border-black/10 bg-[#f1f0ea] px-6 text-[15px] font-semibold text-black/60 transition hover:border-black/25 hover:bg-white hover:text-black"
-
-                  >
-
-                    ← Dashboard
-
-                  </Link>
 
 
 
@@ -1315,7 +1323,7 @@ export default async function AdminProductsPage({
 
             method="get"
 
-            className="grid gap-3 p-5 lg:grid-cols-[1fr_240px_auto]"
+            className="grid gap-3 p-5 lg:grid-cols-[minmax(0,1fr)_220px_220px_auto]"
 
           >
 
@@ -1362,6 +1370,150 @@ export default async function AdminProductsPage({
             </div>
 
 
+
+
+
+            {/* CATEGORY */}
+
+
+
+            <select
+
+              name="categoria"
+
+              defaultValue={
+
+                categoryFilter
+
+              }
+
+              className="h-[58px] rounded-[16px] border border-black/10 bg-[#f5f4ef] px-4 text-[15px] font-semibold outline-none transition focus:border-[#ff5a1f]/45 focus:bg-white"
+
+            >
+
+              <option value="tutte">
+
+                Tutte le categorie
+
+              </option>
+
+
+
+              {Array.from(
+
+                new Map(
+
+                  products
+
+                    .map(
+
+                      (
+
+                        product
+
+                      ) =>
+
+                        getCategory(
+
+                          product.categories
+
+                        )
+
+                    )
+
+                    .filter(
+
+                      (
+
+                        category
+
+                      ): category is Category =>
+
+                        Boolean(
+
+                          category
+
+                        )
+
+                    )
+
+                    .map(
+
+                      (
+
+                        category
+
+                      ) => [
+
+                        category.slug,
+
+                        category,
+
+                      ]
+
+                    )
+
+                ).values()
+
+              )
+
+                .sort(
+
+                  (
+
+                    a,
+
+                    b
+
+                  ) =>
+
+                    a.name.localeCompare(
+
+                      b.name,
+
+                      "it"
+
+                    )
+
+                )
+
+                .map(
+
+                  (
+
+                    category
+
+                  ) => (
+
+                    <option
+
+                      key={
+
+                        category.id
+
+                      }
+
+                      value={
+
+                        category.slug
+
+                      }
+
+                    >
+
+                      {
+
+                        category.name
+
+                      }
+
+                    </option>
+
+                  )
+
+                )}
+
+            </select>
 
 
 
@@ -1450,6 +1602,10 @@ export default async function AdminProductsPage({
 
 
           {(query ||
+
+            categoryFilter !==
+
+              "tutte" ||
 
             status !==
 
