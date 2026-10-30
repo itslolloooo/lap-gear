@@ -3,7 +3,6 @@ import "./globals.css";
 import { RentalProvider } from "@/components/RentalProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { LegalFooter } from "@/components/LegalFooter";
 
 
 export const metadata: Metadata = {
@@ -45,7 +44,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <RentalProvider>
           <Header />
           {children}
-          <LegalFooter />
           <Footer />
         </RentalProvider>
       </body>
