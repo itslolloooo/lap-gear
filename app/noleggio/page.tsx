@@ -1856,11 +1856,41 @@ export default function RentalPage() {
 
 
 
+      const customerEmailStatus =
+
+        result.emailStatus?.customer;
+
+
+
+      const adminEmailStatus =
+
+        result.emailStatus?.admin;
+
+
+
+      const emailWarning =
+
+        customerEmailStatus === "sent" &&
+
+        (
+
+          adminEmailStatus === "sent" ||
+
+          adminEmailStatus === "not_configured"
+
+        )
+
+          ? ""
+
+          : ` · Email: cliente ${customerEmailStatus ?? "unknown"}, admin ${adminEmailStatus ?? "unknown"}`;
+
+
+
       setMessage(
 
 
 
-        `Richiesta inviata · riferimento ${result.reference}`
+        `Richiesta inviata · riferimento ${result.reference}${emailWarning}`
 
 
 
