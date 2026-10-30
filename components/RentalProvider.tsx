@@ -19,6 +19,7 @@ import type {
 type RentalContextValue = {
   items: CartItem[];
   add: (product: Product) => void;
+  addMany: (entries: { product: Product; quantity: number }[]) => void;
   remove: (productId: number) => void;
   changeQuantity: (productId: number, quantity: number) => void;
   clear: () => void;
@@ -436,6 +437,61 @@ export function RentalProvider({
                     1,
                 },
               ];
+            }
+          );
+        },
+
+        addMany(entries) {
+          setItems(
+            (current) => {
+              const next =
+                [...current];
+
+              for (
+                const entry
+                of entries
+              ) {
+                const quantity =
+                  Math.max(
+                    1,
+                    Math.min(
+                      entry.product.quantity,
+                      entry.quantity
+                    )
+                  );
+
+                const index =
+                  next.findIndex(
+                    (item) =>
+                      item.product.id ===
+                      entry.product.id
+                  );
+
+                if (
+                  index >= 0
+                ) {
+                  const existing =
+                    next[index];
+
+                  next[index] = {
+                    ...existing,
+                    quantity:
+                      Math.min(
+                        entry.product.quantity,
+                        existing.quantity +
+                          quantity
+                      ),
+                  };
+                } else {
+                  next.push({
+                    product:
+                      entry.product,
+                    quantity,
+                  });
+                }
+              }
+
+              return next;
             }
           );
         },
