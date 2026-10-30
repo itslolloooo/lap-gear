@@ -18,6 +18,10 @@ import {
 } from "@/components/AddToRentalButton";
 
 import {
+  ProductViewTracker,
+} from "@/components/RentalProvider";
+
+import {
   getCatalogProduct,
 } from "@/lib/catalog-server";
 
@@ -379,6 +383,12 @@ export default async function ProductPage({
 
   return (
     <main className="min-h-screen bg-[#ebeae4] text-[#111111]">
+
+      <ProductViewTracker
+        product={
+          product
+        }
+      />
 
       <script
         type="application/ld+json"
