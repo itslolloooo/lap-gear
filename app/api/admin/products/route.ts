@@ -64,7 +64,7 @@ export async function POST(
       "name"
     );
 
-  const slug =
+  const requestedSlug =
     normalizeSlug(
       text(
         formData,
@@ -111,6 +111,18 @@ export async function POST(
       )
     );
 
+  const initialQuantityRaw =
+    formData.get(
+      "initial_quantity"
+    );
+
+  const initialQuantity =
+    initialQuantityRaw === null
+      ? 0
+      : Number(
+          initialQuantityRaw
+        );
+
   const imageUrl =
     text(
       formData,
@@ -156,9 +168,15 @@ export async function POST(
    * ==========================================
    */
 
+  const baseSlug =
+    requestedSlug ||
+    normalizeSlug(
+      name
+    );
+
   if (
     !name ||
-    !slug ||
+    !baseSlug ||
     !Number.isInteger(
       categoryId
     ) ||
@@ -170,7 +188,12 @@ export async function POST(
       deposit
     ) ||
     priceDay < 0 ||
-    deposit < 0
+    deposit < 0 ||
+    !Number.isInteger(
+      initialQuantity
+    ) ||
+    initialQuantity < 0 ||
+    initialQuantity > 99
   ) {
     return NextResponse.json(
       {
@@ -239,7 +262,57 @@ export async function POST(
     );
   }
 
+  let slug =
+    baseSlug;
+
+  if (!requestedSlug) {
+    let suffix = 2;
+
+    while (true) {
+      const {
+        data: existing,
+        error:
+          slugLookupError,
+      } =
+        await supabase
+          .from(
+            "products"
+          )
+          .select(
+            "id"
+          )
+          .eq(
+            "slug",
+            slug
+          )
+          .maybeSingle();
+
+      if (slugLookupError) {
+        return NextResponse.json(
+          {
+            error:
+              slugLookupError.message,
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+
+      if (!existing) {
+        break;
+      }
+
+      slug =
+        `${baseSlug}-${suffix}`;
+
+      suffix += 1;
+    }
+  }
+
   const {
+    data:
+      createdProduct,
     error,
   } = await supabase
     .from("products")
@@ -280,9 +353,16 @@ export async function POST(
       includes,
 
       attributes,
-    });
+    })
+    .select(
+      "id, slug"
+    )
+    .single();
 
-  if (error) {
+  if (
+    error ||
+    !createdProduct
+  ) {
     console.error(
       "Errore creazione prodotto:",
       error
@@ -291,14 +371,15 @@ export async function POST(
     return NextResponse.json(
       {
         error:
-          error.code ===
+          error?.code ===
           "23505"
             ? "Esiste già un prodotto con questo slug."
-            : error.message,
+            : error?.message ||
+              "Impossibile creare il prodotto.",
       },
       {
         status:
-          error.code ===
+          error?.code ===
           "23505"
             ? 409
             : 500,
@@ -306,9 +387,90 @@ export async function POST(
     );
   }
 
+  if (
+    initialQuantity >
+    0
+  ) {
+    const units =
+      Array.from(
+        {
+          length:
+            initialQuantity,
+        },
+        (
+          _,
+          index
+        ) => ({
+          product_id:
+            createdProduct.id,
+
+          asset_code:
+            `LAP-${String(
+              createdProduct.id
+            ).padStart(
+              4,
+              "0"
+            )}-${String(
+              index + 1
+            ).padStart(
+              2,
+              "0"
+            )}`,
+
+          serial_number:
+            null,
+
+          status:
+            "available",
+
+          notes:
+            null,
+        })
+      );
+
+    const {
+      error:
+        unitsError,
+    } =
+      await supabase
+        .from(
+          "product_units"
+        )
+        .insert(
+          units
+        );
+
+    if (unitsError) {
+      console.error(
+        "Errore creazione inventario iniziale:",
+        unitsError
+      );
+
+      await supabase
+        .from(
+          "products"
+        )
+        .delete()
+        .eq(
+          "id",
+          createdProduct.id
+        );
+
+      return NextResponse.json(
+        {
+          error:
+            "Prodotto non creato: impossibile generare le unità di inventario.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+  }
+
   return NextResponse.redirect(
     new URL(
-      "/admin/prodotti",
+      `/admin/prodotti/${createdProduct.id}?created=1`,
       request.url
     ),
     303
