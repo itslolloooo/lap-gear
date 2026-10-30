@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import {
+  trackAnalyticsEvent,
   useRental,
 } from "@/components/RentalProvider";
 
@@ -30,6 +31,41 @@ export function AddToRentalButton({
 
   function handleAdd() {
     add(product);
+
+    trackAnalyticsEvent(
+      "add_to_cart",
+      {
+        currency:
+          "EUR",
+        value:
+          Number(
+            product.priceDay ||
+              0
+          ),
+        items: [
+          {
+            item_id:
+              String(
+                product.id
+              ),
+            item_name:
+              product.name,
+            item_brand:
+              product.brand ||
+              undefined,
+            item_category:
+              product.categoryLabel,
+            price:
+              Number(
+                product.priceDay ||
+                  0
+              ),
+            quantity:
+              1,
+          },
+        ],
+      }
+    );
 
     setAdded(true);
 
