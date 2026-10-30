@@ -387,6 +387,139 @@ export default async function AdminInventoryPage({
 
   /* =======================================================
 
+     BACKFILL LEGACY PRODUCTS
+
+     ======================================================= */
+
+  if (access.isOwner) {
+    const [
+      {
+        data:
+          legacyProducts,
+        error:
+          legacyProductsError,
+      },
+      {
+        data:
+          existingUnits,
+        error:
+          existingUnitsError,
+      },
+    ] =
+      await Promise.all([
+        supabase
+          .from(
+            "products"
+          )
+          .select(
+            "id"
+          ),
+        supabase
+          .from(
+            "product_units"
+          )
+          .select(
+            "product_id"
+          ),
+      ]);
+
+    if (
+      !legacyProductsError &&
+      !existingUnitsError
+    ) {
+      const productIdsWithUnits =
+        new Set(
+          (
+            existingUnits ??
+            []
+          ).map(
+            (
+              unit
+            ) =>
+              Number(
+                unit.product_id
+              )
+          )
+        );
+
+      const missingProducts =
+        (
+          legacyProducts ??
+          []
+        ).filter(
+          (
+            product
+          ) =>
+            !productIdsWithUnits.has(
+              Number(
+                product.id
+              )
+            )
+        );
+
+      if (
+        missingProducts.length >
+        0
+      ) {
+        const {
+          error:
+            backfillError,
+        } =
+          await supabase
+            .from(
+              "product_units"
+            )
+            .insert(
+              missingProducts.map(
+                (
+                  product
+                ) => ({
+                  product_id:
+                    product.id,
+
+                  asset_code:
+                    `LAP-${String(
+                      product.id
+                    ).padStart(
+                      4,
+                      "0"
+                    )}-01`,
+
+                  serial_number:
+                    null,
+
+                  status:
+                    "available",
+
+                  notes:
+                    "Unità creata automaticamente durante la sincronizzazione inventario.",
+                })
+              )
+            );
+
+        if (
+          backfillError &&
+          backfillError.code !==
+            "23505"
+        ) {
+          console.error(
+            "Errore sincronizzazione prodotti senza inventario:",
+            backfillError
+          );
+        }
+      }
+    } else {
+      console.error(
+        "Impossibile verificare i prodotti senza inventario:",
+        legacyProductsError ??
+          existingUnitsError
+      );
+    }
+  }
+
+
+  /* =======================================================
+
      INVENTORY
 
      ======================================================= */
