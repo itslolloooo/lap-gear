@@ -97,7 +97,7 @@ export default async function HomePage() {
               <div className="p-7 sm:p-10 lg:p-12 xl:p-14">
                 <div className="inline-flex items-center gap-2 rounded-full bg-[#fff0e9] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#e94b12]">
                   <span className="h-2 w-2 rounded-full bg-[#ff5a1f]" />
-                  Video rental · Palestrina / Roma
+                  Noleggio video · Palestrina / Roma
                 </div>
 
                 <h1 className="mt-6 max-w-[900px] text-[48px] font-semibold leading-[0.92] tracking-[-0.06em] sm:text-[64px] lg:text-[72px] xl:text-[80px]">
@@ -189,7 +189,7 @@ export default async function HomePage() {
                   Disponibile a noleggio
                 </div>
                 <h2 className="mt-2 text-[38px] font-semibold tracking-[-0.05em] sm:text-[48px]">
-                  Il gear, subito.
+                  Attrezzatura disponibile.
                 </h2>
               </div>
 
