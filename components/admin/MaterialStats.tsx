@@ -12,6 +12,13 @@ export type MaterialStatRow = {
   grossValue: number;
 };
 
+export type MaterialMonthlyStat = {
+  month: string;
+  label: string;
+  requestCount: number;
+  grossValue: number;
+};
+
 const euro = (v: number) =>
   new Intl.NumberFormat("it-IT", {
     style: "currency",
@@ -19,7 +26,13 @@ const euro = (v: number) =>
     maximumFractionDigits: 0,
   }).format(v);
 
-export function MaterialStats({ rows }: { rows: MaterialStatRow[] }) {
+export function MaterialStats({
+  rows,
+  monthly = [],
+}: {
+  rows: MaterialStatRow[];
+  monthly?: MaterialMonthlyStat[];
+}) {
   const sum = (key: keyof MaterialStatRow) =>
     rows.reduce((total, row) => total + Number(row[key] || 0), 0);
 
@@ -71,6 +84,29 @@ export function MaterialStats({ rows }: { rows: MaterialStatRow[] }) {
         <Stat label="Valore storico" value={euro(totalValue)} hint="richieste non annullate" />
       </div>
 
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,.55fr)]">
+        <TrendChart
+          data={
+            monthly
+          }
+        />
+
+        <InventoryDonut
+          total={
+            totalUnits
+          }
+          available={
+            availableUnits
+          }
+          maintenance={
+            maintenanceUnits
+          }
+          retired={
+            retiredUnits
+          }
+        />
+      </div>
+
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
         <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
           <div className="border-b border-black/10 bg-[#fbfaf7] px-6 py-5 sm:px-7">
@@ -99,6 +135,24 @@ export function MaterialStats({ rows }: { rows: MaterialStatRow[] }) {
                   <div className="min-w-0">
                     <div className="truncate text-[14px] font-semibold">{row.name}</div>
                     <div className="mt-1 text-[10px] text-black/30">{row.totalUnits} unità in inventario</div>
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#efeee8]">
+                      <div
+                        className="h-full rounded-full bg-[#ff5a1f]"
+                        style={{
+                          width: `${Math.max(
+                            6,
+                            Math.round(
+                              (row.requestedQty /
+                                Math.max(
+                                  1,
+                                  ranked[0]?.requestedQty ?? 1
+                                )) *
+                                100
+                            )
+                          )}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                   <Metric label="Richieste" value={String(row.requestCount)} />
                   <Metric label="Pezzi" value={String(row.requestedQty)} />
@@ -125,6 +179,327 @@ export function MaterialStats({ rows }: { rows: MaterialStatRow[] }) {
         </div>
       </div>
     </section>
+  );
+}
+
+
+function TrendChart({
+  data,
+}: {
+  data: MaterialMonthlyStat[];
+}) {
+  const width = 760;
+  const height = 260;
+  const padX = 34;
+  const padTop = 24;
+  const padBottom = 42;
+
+  const maxValue = Math.max(
+    1,
+    ...data.map(
+      (row) =>
+        row.grossValue
+    )
+  );
+
+  const points =
+    data.map(
+      (
+        row,
+        index
+      ) => {
+        const x =
+          data.length <= 1
+            ? width / 2
+            : padX +
+              (index *
+                (width -
+                  padX * 2)) /
+                (data.length -
+                  1);
+
+        const y =
+          padTop +
+          (1 -
+            row.grossValue /
+              maxValue) *
+            (height -
+              padTop -
+              padBottom);
+
+        return {
+          ...row,
+          x,
+          y,
+        };
+      }
+    );
+
+  const path =
+    points
+      .map(
+        (
+          point,
+          index
+        ) =>
+          `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`
+      )
+      .join(" ");
+
+  return (
+    <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
+      <div className="border-b border-black/10 bg-[#fbfaf7] px-6 py-5 sm:px-7">
+        <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+          Trend noleggi
+        </div>
+        <div className="mt-1 text-[22px] font-semibold tracking-[-0.035em]">
+          Valore mensile richiesto.
+        </div>
+      </div>
+
+      {data.length === 0 ? (
+        <div className="p-7 text-[13px] text-black/40">
+          Il grafico comparirà appena ci sarà storico sufficiente.
+        </div>
+      ) : (
+        <div className="p-5 sm:p-7">
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className="h-auto w-full overflow-visible"
+            role="img"
+            aria-label="Andamento mensile del valore dei noleggi richiesti"
+          >
+            {[0.25, 0.5, 0.75, 1].map(
+              (
+                fraction
+              ) => {
+                const y =
+                  padTop +
+                  (1 -
+                    fraction) *
+                    (height -
+                      padTop -
+                      padBottom);
+
+                return (
+                  <line
+                    key={
+                      fraction
+                    }
+                    x1={
+                      padX
+                    }
+                    x2={
+                      width -
+                      padX
+                    }
+                    y1={
+                      y
+                    }
+                    y2={
+                      y
+                    }
+                    stroke="currentColor"
+                    className="text-black/10"
+                    strokeWidth="1"
+                  />
+                );
+              }
+            )}
+
+            <path
+              d={
+                path
+              }
+              fill="none"
+              stroke="currentColor"
+              className="text-[#ff5a1f]"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+
+            {points.map(
+              (
+                point
+              ) => (
+                <g
+                  key={
+                    point.month
+                  }
+                >
+                  <circle
+                    cx={
+                      point.x
+                    }
+                    cy={
+                      point.y
+                    }
+                    r="6"
+                    fill="currentColor"
+                    className="text-[#ff5a1f]"
+                  />
+                  <text
+                    x={
+                      point.x
+                    }
+                    y={
+                      height -
+                      14
+                    }
+                    textAnchor="middle"
+                    className="fill-black/40 text-[11px] font-semibold"
+                  >
+                    {
+                      point.label
+                    }
+                  </text>
+                </g>
+              )
+            )}
+          </svg>
+
+          <div className="mt-2 flex flex-wrap gap-4 border-t border-black/10 pt-4">
+            {data.slice(-3).map(
+              (
+                row
+              ) => (
+                <div
+                  key={
+                    row.month
+                  }
+                  className="text-[11px] text-black/40"
+                >
+                  <span className="font-semibold text-black/65">
+                    {
+                      row.label
+                    }
+                  </span>{" "}
+                  · {row.requestCount} richieste · {euro(
+                    row.grossValue
+                  )}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+function InventoryDonut({
+  total,
+  available,
+  maintenance,
+  retired,
+}: {
+  total: number;
+  available: number;
+  maintenance: number;
+  retired: number;
+}) {
+  const safeTotal =
+    Math.max(
+      1,
+      total
+    );
+
+  const availablePct =
+    (available /
+      safeTotal) *
+    100;
+
+  const maintenancePct =
+    (maintenance /
+      safeTotal) *
+    100;
+
+  const gradient =
+    `conic-gradient(#168a50 0 ${availablePct}%, #d98a08 ${availablePct}% ${availablePct + maintenancePct}%, #8a8a84 ${availablePct + maintenancePct}% 100%)`;
+
+  return (
+    <div className="rounded-[24px] border border-black/10 bg-white p-6 sm:p-7">
+      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+        Stato inventario
+      </div>
+
+      <div className="mt-6 flex items-center gap-6">
+        <div
+          className="relative h-36 w-36 shrink-0 rounded-full"
+          style={{
+            background:
+              gradient,
+          }}
+        >
+          <div className="absolute inset-[18px] flex items-center justify-center rounded-full bg-white">
+            <div className="text-center">
+              <div className="text-[28px] font-semibold tracking-[-0.05em]">
+                {
+                  total
+                }
+              </div>
+              <div className="text-[9px] font-bold uppercase tracking-[0.08em] text-black/30">
+                unità
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="min-w-0 flex-1 space-y-3">
+          <Legend
+            dotClass="bg-[#168a50]"
+            label="Operative"
+            value={
+              available
+            }
+          />
+          <Legend
+            dotClass="bg-[#d98a08]"
+            label="Manutenzione"
+            value={
+              maintenance
+            }
+          />
+          <Legend
+            dotClass="bg-[#8a8a84]"
+            label="Ritirate"
+            value={
+              retired
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function Legend({
+  dotClass,
+  label,
+  value,
+}: {
+  dotClass: string;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2">
+        <span
+          className={`h-2.5 w-2.5 rounded-full ${dotClass}`}
+        />
+        <span className="text-[12px] font-semibold text-black/50">
+          {label}
+        </span>
+      </div>
+
+      <span className="text-[13px] font-semibold">
+        {value}
+      </span>
+    </div>
   );
 }
 
