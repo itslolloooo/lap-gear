@@ -35,7 +35,7 @@ type AnalyticsEventParams =
 
 declare global {
   interface Window {
-    dataLayer?: unknown[][];
+    dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
   }
 }
@@ -56,15 +56,16 @@ function ensureGtag() {
   window.dataLayer =
     window.dataLayer || [];
 
-  window.gtag =
-    window.gtag ||
-    function gtag(
-      ...args: unknown[]
-    ) {
-      window.dataLayer?.push(
-        args
-      );
-    };
+  if (!window.gtag) {
+    window.gtag =
+      function gtag(
+        ..._args: unknown[]
+      ) {
+        window.dataLayer?.push(
+          arguments
+        );
+      };
+  }
 }
 
 function setGoogleConsent(
