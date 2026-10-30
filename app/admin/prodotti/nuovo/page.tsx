@@ -5,8 +5,8 @@ import {
 } from "next/navigation";
 
 import {
-  ProductForm,
-} from "@/components/admin/ProductForm";
+  QuickProductForm,
+} from "@/components/admin/QuickProductForm";
 
 import {
   createSupabaseAuthServerClient,
@@ -191,17 +191,17 @@ export default async function NewProductPage() {
                 </div>
 
                 <div className="mt-3 text-[27px] font-semibold leading-tight">
-                  Scheda prima.
+                  Un solo flusso.
                   <br />
-                  Inventario dopo.
+                  Gear pronto.
                 </div>
               </div>
 
               <p className="mt-10 text-[13px] leading-6 text-white/40">
-                Dopo aver creato il
-                prodotto potrai associare
-                le singole unità fisiche
-                dalla sezione Inventario.
+                Inserisci quantità e dati
+                essenziali: prodotto e unità
+                fisiche vengono creati insieme
+                automaticamente.
               </p>
 
             </div>
@@ -213,14 +213,11 @@ export default async function NewProductPage() {
             FORM
             ================================================= */}
 
-        <ProductForm
-          mode="create"
+        <QuickProductForm
           categories={
             categories ??
             []
           }
-          action="/api/admin/products"
-          submitLabel="Crea prodotto"
         />
 
       </div>
