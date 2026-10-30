@@ -5,6 +5,9 @@ import { getBusinessInfo } from "@/lib/business-info";
 export const metadata: Metadata = {
   title: "Note legali | LAP GEAR",
   description: "Informazioni legali e dati del titolare di LAP GEAR.",
+  alternates: {
+    canonical: "https://lapgear.it/note-legali",
+  },
 };
 
 export default function LegalNoticePage() {
