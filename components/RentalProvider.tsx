@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Script from "next/script";
 import { usePathname } from "next/navigation";
 import {
   createContext,
@@ -87,32 +88,8 @@ function setGoogleConsent(
   );
 }
 
-function loadGoogleAnalytics() {
+function configureGoogleAnalytics() {
   ensureGtag();
-
-  if (
-    !document.getElementById(
-      "lapgear-ga4"
-    )
-  ) {
-    const script =
-      document.createElement(
-        "script"
-      );
-
-    script.id =
-      "lapgear-ga4";
-
-    script.async =
-      true;
-
-    script.src =
-      `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-
-    document.head.appendChild(
-      script
-    );
-  }
 
   if (
     !document.documentElement.dataset
@@ -127,8 +104,6 @@ function loadGoogleAnalytics() {
       "config",
       GA_ID,
       {
-        anonymize_ip:
-          true,
         send_page_view:
           false,
         debug_mode:
@@ -264,6 +239,12 @@ export function RentalProvider({
       null
     );
 
+  const [
+    gaReady,
+    setGaReady,
+  ] =
+    useState(false);
+
   useEffect(() => {
     try {
       const stored =
@@ -314,8 +295,6 @@ export function RentalProvider({
         "granted"
       );
 
-      loadGoogleAnalytics();
-
       setAnalyticsConsent(
         "granted"
       );
@@ -352,7 +331,8 @@ export function RentalProvider({
   useEffect(() => {
     if (
       analyticsConsent !==
-      "granted"
+        "granted" ||
+      !gaReady
     ) {
       return;
     }
@@ -371,6 +351,7 @@ export function RentalProvider({
   }, [
     analyticsConsent,
     pathname,
+    gaReady,
   ]);
 
   function acceptAnalytics() {
@@ -382,8 +363,6 @@ export function RentalProvider({
     setGoogleConsent(
       "granted"
     );
-
-    loadGoogleAnalytics();
 
     setAnalyticsConsent(
       "granted"
@@ -543,6 +522,19 @@ export function RentalProvider({
         value
       }
     >
+      {analyticsConsent ===
+        "granted" && (
+        <Script
+          id="lapgear-ga4"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+          onReady={() => {
+            configureGoogleAnalytics();
+            setGaReady(true);
+          }}
+        />
+      )}
+
       {children}
 
       {analyticsConsent ===
