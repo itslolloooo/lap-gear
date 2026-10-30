@@ -1,3 +1,7 @@
+import type {
+  Metadata,
+} from "next";
+
 import {
   Suspense,
 } from "react";
@@ -13,6 +17,15 @@ import {
 
 export const dynamic =
   "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Catalogo noleggio attrezzatura video",
+  description:
+    "Catalogo LAP GEAR: videocamere, ottiche, audio, luci, monitor e attrezzatura per live e streaming a noleggio a Palestrina, Roma Est e Roma.",
+  alternates: {
+    canonical: "https://lapgear.it/catalogo",
+  },
+};
 
 export default async function CatalogPage() {
   const [
