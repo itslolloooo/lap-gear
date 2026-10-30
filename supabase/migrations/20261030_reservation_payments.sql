@@ -21,3 +21,4 @@ create index if not exists idx_reservation_payments_paid_at
   on public.reservation_payments(paid_at);
 
 alter table public.reservation_payments enable row level security;
+revoke all on table public.reservation_payments from anon, authenticated;
