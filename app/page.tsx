@@ -256,31 +256,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section
-          id="contatti"
-          className="px-5 pb-14 sm:px-8 lg:px-10 lg:pb-20 xl:px-14"
-        >
-          <div className="mx-auto flex max-w-[1680px] flex-col gap-6 rounded-[26px] border border-black/10 bg-white p-7 sm:p-9 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ff5a1f]">
-                Hai dubbi sul kit?
-              </div>
-              <h2 className="mt-2 text-[32px] font-semibold tracking-[-0.045em] sm:text-[40px]">
-                Scrivici cosa devi girare.
-              </h2>
-              <p className="mt-2 text-[14px] text-black/45">
-                Ti aiutiamo a scegliere la configurazione senza aggiungere materiale inutile.
-              </p>
-            </div>
-
-            <a
-              href="mailto:info@lapgear.it"
-              className="inline-flex h-[54px] shrink-0 items-center justify-center rounded-[15px] bg-[#ff5a1f] px-6 text-[14px] font-semibold text-white transition hover:bg-[#181818]"
-            >
-              info@lapgear.it →
-            </a>
-          </div>
-        </section>
       </main>
     </>
   );
