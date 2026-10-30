@@ -799,12 +799,12 @@ export function CatalogClient({
           CONTROL PANEL
           ===================================================== */}
 
-      <section className="sticky top-[78px] z-30 overflow-hidden rounded-[26px] border border-black/10 bg-[#ebeae4]/95 shadow-[0_15px_45px_rgba(0,0,0,0.055)] backdrop-blur-xl lg:top-[88px]">
+      <section className="overflow-hidden rounded-[22px] border border-black/10 bg-white">
 
         {/* SEARCH ROW */}
 
-        <div className="p-4 sm:p-5 lg:p-6">
-          <div className="flex flex-col gap-3 xl:flex-row">
+        <div className="p-3 sm:p-4">
+          <div className="flex flex-col gap-2 lg:flex-row">
 
             {/* SEARCH */}
 
@@ -829,7 +829,7 @@ export function CatalogClient({
                 placeholder={getSearchPlaceholder(
                   category
                 )}
-                className="h-[64px] w-full rounded-[18px] border border-black/10 bg-white pl-14 pr-14 text-[17px] font-medium outline-none transition placeholder:text-black/30 focus:border-[#ff5a1f]/50 focus:shadow-[0_0_0_4px_rgba(255,90,31,0.07)] lg:h-[68px]"
+                className="h-[52px] w-full rounded-[15px] border border-black/10 bg-[#f6f5f0] pl-12 pr-12 text-[15px] font-medium outline-none transition placeholder:text-black/30 focus:border-[#ff5a1f]/50 focus:bg-white"
               />
 
               {search && (
@@ -862,18 +862,18 @@ export function CatalogClient({
               }
               className={`
                 flex
-                h-[64px]
+                h-[52px]
                 shrink-0
                 items-center
                 justify-between
                 gap-5
-                rounded-[18px]
+                rounded-[15px]
                 border
-                px-6
-                text-[16px]
+                px-5
+                text-[14px]
                 font-semibold
                 transition
-                lg:h-[68px]
+
 
                 ${
                   showFilters ||
@@ -915,7 +915,7 @@ export function CatalogClient({
                       .value as SortMode
                   )
                 }
-                className="h-[64px] w-full min-w-[220px] appearance-none rounded-[18px] border border-black/10 bg-white px-5 pr-12 text-[15px] font-semibold outline-none transition hover:border-black/25 lg:h-[68px]"
+                className="h-[52px] w-full min-w-[190px] appearance-none rounded-[15px] border border-black/10 bg-[#f6f5f0] px-4 pr-10 text-[13px] font-semibold outline-none transition hover:border-black/25"
               >
                 <option value="featured">
                   In evidenza
@@ -946,7 +946,7 @@ export function CatalogClient({
             CATEGORIES
             ===================================================== */}
 
-        <div className="border-t border-black/10 bg-white px-4 py-4 sm:px-5 lg:px-6">
+        <div className="border-t border-black/10 bg-[#fbfaf7] px-3 py-3 sm:px-4">
           <div className="flex gap-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
             <CategoryButton
@@ -1002,7 +1002,7 @@ export function CatalogClient({
             ===================================================== */}
 
         {showFilters && (
-          <div className="border-t border-black/10 bg-[#f2f1eb] p-5 sm:p-6 lg:p-7">
+          <div className="border-t border-black/10 bg-[#f2f1eb] p-4 sm:p-5">
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -1010,7 +1010,7 @@ export function CatalogClient({
                   Filtri catalogo
                 </div>
 
-                <h3 className="mt-2 text-[30px] font-semibold tracking-[-0.045em]">
+                <h3 className="mt-1 text-[22px] font-semibold tracking-[-0.035em]">
                   {
                     activeCategoryName
                   }
@@ -1032,7 +1032,7 @@ export function CatalogClient({
             </div>
 
 
-            <div className="mt-7 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 
               {/* BRAND */}
 
@@ -1223,7 +1223,7 @@ export function CatalogClient({
           RESULTS HEADER
           ===================================================== */}
 
-      <div className="flex flex-col gap-5 py-9 sm:flex-row sm:items-end sm:justify-between lg:py-11">
+      <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-end sm:justify-between lg:py-7">
         <div>
           <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-[#ff5a1f]">
             {
@@ -1231,7 +1231,7 @@ export function CatalogClient({
             }
           </div>
 
-          <div className="mt-2 text-[36px] font-semibold leading-none tracking-[-0.05em] sm:text-[42px]">
+          <div className="mt-1 text-[29px] font-semibold leading-none tracking-[-0.045em] sm:text-[34px]">
             {
               filteredProducts.length
             }{" "}
@@ -1264,7 +1264,7 @@ export function CatalogClient({
 
       {filteredProducts.length >
       0 ? (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {filteredProducts.map(
             (product) => (
               <ProductCard
@@ -1274,6 +1274,7 @@ export function CatalogClient({
                 product={
                   product
                 }
+                compact
               />
             )
           )}
@@ -1502,14 +1503,14 @@ function CategoryButton({
       className={`
         group
         flex
-        h-[50px]
+        h-[42px]
         shrink-0
         items-center
         gap-3
         rounded-full
         border
-        px-5
-        text-[15px]
+        px-4
+        text-[13px]
         font-semibold
         transition
 
@@ -1554,7 +1555,7 @@ function FilterSection({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[21px] border border-black/10 bg-white p-5 sm:p-6">
+    <section className="rounded-[17px] border border-black/10 bg-white p-4">
       <div className="flex items-start gap-4">
         <div className="flex h-8 min-w-8 items-center justify-center rounded-full bg-[#fff0e9] px-2 text-[11px] font-bold text-[#ff5a1f]">
           {
@@ -1571,7 +1572,7 @@ function FilterSection({
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-3">
         {
           children
         }
