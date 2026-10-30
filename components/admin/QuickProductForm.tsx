@@ -288,8 +288,8 @@ export function QuickProductForm({
               <div>✓ genera automaticamente lo slug</div>
               <div>✓ crea la scheda prodotto come bozza</div>
               <div>✓ crea {quantity || "0"} unità di inventario</div>
-              <div>✓ genera i codici asset
-              <div>✓ non pubblica il prodotto sul sito</div></div>
+              <div>✓ genera i codici asset</div>
+              <div>✓ non pubblica il prodotto sul sito</div>
             </div>
           </div>
 
