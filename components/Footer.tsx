@@ -106,10 +106,10 @@ function Footer() {
               </div>
 
               <a
-                href="mailto:info@lapequipment.it"
+                href="mailto:info@lapgear.it"
                 className="mt-2 block break-all text-[17px] font-semibold text-white transition hover:text-[#ff7b4a]"
               >
-                info@lapequipment.it
+                info@lapgear.it
               </a>
             </div>
 
