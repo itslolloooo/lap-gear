@@ -32,40 +32,58 @@ export default async function HomePage() {
 
   const localBusinessStructuredData = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: "LAP GEAR",
-    url: "https://lapgear.it",
-    description:
-      "Noleggio di videocamere, ottiche, audio, luci e attrezzatura professionale per produzioni, shooting, eventi e live.",
-    email: business.email,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Via Prenestina Nuova 291",
-      postalCode: "00036",
-      addressLocality: "Palestrina",
-      addressRegion: "RM",
-      addressCountry: "IT",
-    },
-    areaServed: [
+    "@graph": [
       {
-        "@type": "City",
-        name: "Palestrina",
+        "@type": "WebSite",
+        "@id": "https://lapgear.it/#website",
+        url: "https://lapgear.it",
+        name: "LAP GEAR",
+        inLanguage: "it-IT",
+        publisher: {
+          "@id": "https://lapgear.it/#business",
+        },
       },
       {
-        "@type": "Place",
-        name: "Roma Est",
+        "@type": "LocalBusiness",
+        "@id": "https://lapgear.it/#business",
+        name: "LAP GEAR",
+        legalName: business.legalName,
+        url: "https://lapgear.it",
+        logo: "https://lapgear.it/icon.svg",
+        image: "https://lapgear.it/icon.svg",
+        description:
+          "Noleggio di videocamere, ottiche, audio, luci e attrezzatura professionale per produzioni, shooting, eventi e live.",
+        email: business.email,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "Via Prenestina Nuova 291",
+          postalCode: "00036",
+          addressLocality: "Palestrina",
+          addressRegion: "RM",
+          addressCountry: "IT",
+        },
+        areaServed: [
+          {
+            "@type": "City",
+            name: "Palestrina",
+          },
+          {
+            "@type": "Place",
+            name: "Roma Est",
+          },
+          {
+            "@type": "City",
+            name: "Roma",
+          },
+        ],
+        knowsAbout: [
+          "Noleggio videocamere",
+          "Noleggio ottiche",
+          "Noleggio attrezzatura audio",
+          "Noleggio illuminazione video",
+          "Noleggio attrezzatura streaming e live",
+        ],
       },
-      {
-        "@type": "City",
-        name: "Roma",
-      },
-    ],
-    knowsAbout: [
-      "Noleggio videocamere",
-      "Noleggio ottiche",
-      "Noleggio attrezzatura audio",
-      "Noleggio illuminazione video",
-      "Noleggio attrezzatura streaming e live",
     ],
   };
 
