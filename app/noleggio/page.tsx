@@ -68,6 +68,18 @@ import {
 
 
 
+import {
+
+
+
+  RENTAL_TERMS_VERSION,
+
+
+
+} from "@/lib/rental-terms";
+
+
+
 
 
 
