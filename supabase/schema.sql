@@ -50,6 +50,8 @@ create table if not exists public.reservations (
   end_date date not null,
   status text not null default 'requested' check (status in ('requested','confirmed','picked_up','returned','cancelled')),
   notes text,
+  terms_accepted_at timestamptz,
+  terms_version text,
   created_at timestamptz not null default now(),
   constraint reservation_dates_valid check (end_date >= start_date)
 );
