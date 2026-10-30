@@ -4,6 +4,9 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Recesso | LAP GEAR",
   description: "Informazioni sul recesso durante la fase di lancio di LAP GEAR.",
+  alternates: {
+    canonical: "https://lapgear.it/recesso",
+  },
 };
 
 export default function WithdrawalPage() {
