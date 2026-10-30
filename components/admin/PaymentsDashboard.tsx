@@ -303,6 +303,204 @@ export function PaymentsDashboard() {
             {}
           );
 
+        const monthlyMap =
+          new Map<
+            string,
+            {
+              positive: number;
+              refunds: number;
+              net: number;
+              count: number;
+            }
+          >();
+
+        for (
+          const payment
+          of payments
+        ) {
+          const date =
+            new Date(
+              payment.paid_at
+            );
+
+          const key =
+            `${date.getFullYear()}-${String(
+              date.getMonth() + 1
+            ).padStart(2, "0")}`;
+
+          const current =
+            monthlyMap.get(
+              key
+            ) ?? {
+              positive: 0,
+              refunds: 0,
+              net: 0,
+              count: 0,
+            };
+
+          const amount =
+            Number(
+              payment.amount
+            );
+
+          if (
+            amount >= 0
+          ) {
+            current.positive +=
+              amount;
+          } else {
+            current.refunds +=
+              Math.abs(
+                amount
+              );
+          }
+
+          current.net +=
+            amount;
+
+          current.count +=
+            1;
+
+          monthlyMap.set(
+            key,
+            current
+          );
+        }
+
+        const now =
+          new Date();
+
+        const currentMonthKey =
+          `${now.getFullYear()}-${String(
+            now.getMonth() + 1
+          ).padStart(2, "0")}`;
+
+        const previousMonth =
+          new Date(
+            now.getFullYear(),
+            now.getMonth() - 1,
+            1
+          );
+
+        const previousMonthKey =
+          `${previousMonth.getFullYear()}-${String(
+            previousMonth.getMonth() + 1
+          ).padStart(2, "0")}`;
+
+        const currentMonth =
+          monthlyMap.get(
+            currentMonthKey
+          ) ?? {
+            positive: 0,
+            refunds: 0,
+            net: 0,
+            count: 0,
+          };
+
+        const previousMonthStats =
+          monthlyMap.get(
+            previousMonthKey
+          ) ?? {
+            positive: 0,
+            refunds: 0,
+            net: 0,
+            count: 0,
+          };
+
+        const monthFormatter =
+          new Intl.DateTimeFormat(
+            "it-IT",
+            {
+              month:
+                "short",
+              year:
+                "2-digit",
+            }
+          );
+
+        const monthly =
+          Array.from(
+            monthlyMap.entries()
+          )
+            .sort(
+              ([a], [b]) =>
+                a.localeCompare(
+                  b
+                )
+            )
+            .slice(
+              -12
+            )
+            .map(
+              (
+                [
+                  key,
+                  value,
+                ]
+              ) => {
+                const [
+                  year,
+                  month,
+                ] =
+                  key
+                    .split(
+                      "-"
+                    )
+                    .map(
+                      Number
+                    );
+
+                return {
+                  key,
+                  label:
+                    monthFormatter.format(
+                      new Date(
+                        year,
+                        month -
+                          1,
+                        1
+                      )
+                    ),
+                  ...value,
+                };
+              }
+            );
+
+        const lastSix =
+          monthly.slice(
+            -6
+          );
+
+        const averageSix =
+          lastSix.length >
+          0
+            ? lastSix.reduce(
+                (
+                  sum,
+                  month
+                ) =>
+                  sum +
+                  month.net,
+                0
+              ) /
+              lastSix.length
+            : 0;
+
+        const changePct =
+          previousMonthStats.net !==
+          0
+            ? (
+                (
+                  currentMonth.net -
+                  previousMonthStats.net
+                ) /
+                Math.abs(
+                  previousMonthStats.net
+                )
+              ) *
+              100
+            : null;
+
         return {
           positive,
           refunds,
@@ -310,6 +508,12 @@ export function PaymentsDashboard() {
             positive -
             refunds,
           byMethod,
+          currentMonth,
+          previousMonth:
+            previousMonthStats,
+          monthly,
+          averageSix,
+          changePct,
         };
       },
       [
@@ -373,6 +577,62 @@ export function PaymentsDashboard() {
           }
           hint="righe nello storico"
         />
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,.55fr)]">
+        <MonthlyCashflowChart
+          data={
+            stats.monthly
+          }
+        />
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+          <Stat
+            label="Questo mese"
+            value={
+              money(
+                stats.currentMonth.net
+              )
+            }
+            hint={`${stats.currentMonth.count} movimenti netti`}
+            accent
+          />
+
+          <Stat
+            label="Incassato mese"
+            value={
+              money(
+                stats.currentMonth.positive
+              )
+            }
+            hint="entrate registrate"
+          />
+
+          <Stat
+            label="Rimborsi mese"
+            value={
+              money(
+                stats.currentMonth.refunds
+              )
+            }
+            hint="uscite registrate"
+          />
+
+          <Stat
+            label="Media 6 mesi"
+            value={
+              money(
+                stats.averageSix
+              )
+            }
+            hint={
+              stats.changePct ===
+              null
+                ? "confronto mese precedente non disponibile"
+                : `${stats.changePct >= 0 ? "+" : ""}${stats.changePct.toFixed(1)}% vs mese precedente`
+            }
+          />
+        </div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
@@ -524,6 +784,247 @@ export function PaymentsDashboard() {
   );
 }
 
+
+
+function MonthlyCashflowChart({
+  data,
+}: {
+  data: Array<{
+    key: string;
+    label: string;
+    net: number;
+    positive: number;
+    refunds: number;
+    count: number;
+  }>;
+}) {
+  const width =
+    760;
+  const height =
+    270;
+  const padX =
+    34;
+  const padTop =
+    28;
+  const padBottom =
+    46;
+
+  const maxAbs =
+    Math.max(
+      1,
+      ...data.map(
+        (
+          item
+        ) =>
+          Math.abs(
+            item.net
+          )
+      )
+    );
+
+  const zeroY =
+    padTop +
+    (
+      height -
+      padTop -
+      padBottom
+    ) /
+      2;
+
+  const barWidth =
+    data.length >
+    0
+      ? Math.min(
+          54,
+          (
+            width -
+            padX * 2
+          ) /
+            Math.max(
+              data.length,
+              1
+            ) *
+            0.56
+        )
+      : 36;
+
+  return (
+    <div className="overflow-hidden rounded-[24px] border border-black/10 bg-white">
+      <div className="border-b border-black/10 bg-[#fbfaf7] px-6 py-5 sm:px-7">
+        <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#ff5a1f]">
+          Cashflow mensile
+        </div>
+
+        <div className="mt-1 text-[22px] font-semibold tracking-[-0.035em]">
+          Quanto entra davvero ogni mese.
+        </div>
+      </div>
+
+      {data.length ===
+      0 ? (
+        <div className="p-7 text-[13px] text-black/40">
+          Il grafico comparirà appena registri i primi pagamenti.
+        </div>
+      ) : (
+        <div className="p-5 sm:p-7">
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            className="h-auto w-full overflow-visible"
+            role="img"
+            aria-label="Incassi netti mensili"
+          >
+            <line
+              x1={
+                padX
+              }
+              x2={
+                width -
+                padX
+              }
+              y1={
+                zeroY
+              }
+              y2={
+                zeroY
+              }
+              stroke="currentColor"
+              className="text-black/15"
+              strokeWidth="1"
+            />
+
+            {data.map(
+              (
+                row,
+                index
+              ) => {
+                const slot =
+                  (
+                    width -
+                    padX * 2
+                  ) /
+                  Math.max(
+                    data.length,
+                    1
+                  );
+
+                const x =
+                  padX +
+                  index *
+                    slot +
+                  slot /
+                    2 -
+                  barWidth /
+                    2;
+
+                const magnitude =
+                  (
+                    Math.abs(
+                      row.net
+                    ) /
+                    maxAbs
+                  ) *
+                  (
+                    (
+                      height -
+                      padTop -
+                      padBottom
+                    ) /
+                      2 -
+                    12
+                  );
+
+                const y =
+                  row.net >=
+                  0
+                    ? zeroY -
+                      magnitude
+                    : zeroY;
+
+                return (
+                  <g
+                    key={
+                      row.key
+                    }
+                  >
+                    <rect
+                      x={
+                        x
+                      }
+                      y={
+                        y
+                      }
+                      width={
+                        barWidth
+                      }
+                      height={
+                        Math.max(
+                          2,
+                          magnitude
+                        )
+                      }
+                      rx="8"
+                      fill="currentColor"
+                      className={
+                        row.net >=
+                        0
+                          ? "text-[#168a50]"
+                          : "text-[#b7352b]"
+                      }
+                    />
+
+                    <text
+                      x={
+                        x +
+                        barWidth /
+                          2
+                      }
+                      y={
+                        height -
+                        16
+                      }
+                      textAnchor="middle"
+                      className="fill-black/40 text-[10px] font-semibold"
+                    >
+                      {
+                        row.label
+                      }
+                    </text>
+                  </g>
+                );
+              }
+            )}
+          </svg>
+
+          <div className="mt-2 flex flex-wrap gap-4 border-t border-black/10 pt-4">
+            {data.slice(-3).map(
+              (
+                row
+              ) => (
+                <div
+                  key={
+                    row.key
+                  }
+                  className="text-[11px] text-black/40"
+                >
+                  <span className="font-semibold text-black/65">
+                    {
+                      row.label
+                    }
+                  </span>{" "}
+                  · netto {money(
+                    row.net
+                  )} · entrate {money(
+                    row.positive
+                  )}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Stat({
   label,
