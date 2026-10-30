@@ -132,6 +132,7 @@ alter table public.categories enable row level security;
 alter table public.products enable row level security;
 alter table public.product_units enable row level security;
 alter table public.reservation_payments enable row level security;
+revoke all on table public.reservation_payments from anon, authenticated;
 
 -- Catalogo pubblico: solo lettura dei prodotti e categorie attive.
 drop policy if exists "public read active categories" on public.categories;
