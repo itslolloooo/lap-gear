@@ -5,6 +5,9 @@ import { getBusinessInfo } from "@/lib/business-info";
 export const metadata: Metadata = {
   title: "Condizioni del servizio | LAP GEAR",
   description: "Condizioni della fase di lancio e raccolta richieste di interesse LAP GEAR.",
+  alternates: {
+    canonical: "https://lapgear.it/termini-noleggio",
+  },
 };
 
 const LAST_UPDATED = "12 ottobre 2026";
