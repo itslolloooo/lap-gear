@@ -10,6 +10,12 @@ import {
 
 } from "@/lib/supabase-server";
 
+import {
+
+  RENTAL_TERMS_VERSION,
+
+} from "@/lib/rental-terms";
+
 export const dynamic =
 
   "force-dynamic";
@@ -71,6 +77,14 @@ type RequestBody = {
     string;
 
   notes?:
+
+    string;
+
+  termsAccepted?:
+
+    boolean;
+
+  termsVersion?:
 
     string;
 
@@ -934,6 +948,23 @@ export async function POST(
 
       );
 
+  if (
+    body.termsAccepted !==
+      true ||
+    body.termsVersion !==
+      RENTAL_TERMS_VERSION
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Le condizioni di noleggio devono essere accettate prima di inviare la richiesta.",
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+
   /* =======================================================
 
      ITEMS
@@ -1645,6 +1676,14 @@ export async function POST(
           notes ||
 
           null,
+
+        terms_accepted_at:
+
+          new Date().toISOString(),
+
+        terms_version:
+
+          RENTAL_TERMS_VERSION,
 
       })
 
