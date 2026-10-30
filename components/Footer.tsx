@@ -22,9 +22,9 @@ function Footer() {
               </div>
 
               <h2 className="mt-3 max-w-[760px] text-[36px] font-semibold leading-[0.96] tracking-[-0.05em] sm:text-[46px] lg:text-[54px]">
-                Troviamo il gear giusto.
+                Troviamo l’attrezzatura giusta.
                 <span className="block text-white/35">
-                  Senza complicare il set.
+                  Per il tuo set, senza complicazioni.
                 </span>
               </h2>
 
