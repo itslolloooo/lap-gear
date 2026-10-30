@@ -15,6 +15,18 @@ export const metadata: Metadata = {
   description:
     "Noleggio di videocamere, ottiche, audio, luci e attrezzatura professionale a Palestrina, Roma Est e Roma.",
   applicationName: "LAP GEAR",
+  icons: {
+    icon: [
+      {
+        url: "/favicon.ico",
+      },
+      {
+        url: "/icon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    shortcut: "/favicon.ico",
+  },
   openGraph: {
     title: "Noleggio attrezzatura video a Palestrina e Roma | LAP GEAR",
     description:
