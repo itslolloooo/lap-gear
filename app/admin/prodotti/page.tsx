@@ -629,6 +629,23 @@ export default async function AdminProductsPage({
 
     ) as unknown as AdminProduct[];
 
+  products.sort(
+    (
+      a,
+      b
+    ) =>
+      a.name.localeCompare(
+        b.name,
+        "it",
+        {
+          sensitivity:
+            "base",
+          numeric:
+            true,
+        }
+      )
+  );
+
 
 
 
@@ -1071,7 +1088,7 @@ export default async function AdminProductsPage({
 
                     >
 
-                      Categorie
+                      Gestisci categorie
 
                     </Link>
 
