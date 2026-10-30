@@ -170,9 +170,10 @@ export function ProductViewTracker({
   product: Product;
 }) {
   useEffect(() => {
-    trackAnalyticsEvent(
-      "view_item",
-      {
+    function sendViewItem() {
+      trackAnalyticsEvent(
+        "view_item",
+        {
         currency:
           "EUR",
         value:
@@ -201,9 +202,24 @@ export function ProductViewTracker({
             quantity:
               1,
           },
-        ],
-      }
+          ],
+        }
+      );
+    }
+
+    sendViewItem();
+
+    window.addEventListener(
+      "lapgear-analytics-consent-granted",
+      sendViewItem
     );
+
+    return () => {
+      window.removeEventListener(
+        "lapgear-analytics-consent-granted",
+        sendViewItem
+      );
+    };
   }, [product]);
 
   return null;
@@ -363,6 +379,12 @@ export function RentalProvider({
 
     setAnalyticsConsent(
       "granted"
+    );
+
+    window.dispatchEvent(
+      new Event(
+        "lapgear-analytics-consent-granted"
+      )
     );
   }
 
