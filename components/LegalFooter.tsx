@@ -23,13 +23,13 @@ export function LegalFooter() {
           </div>
 
           <div className="mt-3 text-[22px] font-semibold tracking-[-0.035em]">
-            Video rental · fase di lancio
+            Professional Video Rental
           </div>
 
           <p className="mt-3 max-w-[650px] text-[12px] leading-5 text-white/40">
-            Il sito raccoglie richieste di interesse e disponibilità non vincolanti.
-            In questa fase non vengono conclusi contratti di noleggio online e non
-            vengono richiesti pagamenti o cauzioni tramite il sito.
+            Il sito consente di comporre il kit e inviare una richiesta di disponibilità.
+            Il noleggio viene confermato solo dopo la verifica del materiale e l&apos;accettazione
+            delle condizioni economiche e operative comunicate da LAP GEAR.
           </p>
 
           <div className="mt-4 space-y-1 text-[13px] leading-6 text-white/50">
