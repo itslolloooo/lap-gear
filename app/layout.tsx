@@ -18,9 +18,8 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/favicon.ppm",
-        type: "image/x-portable-pixmap",
-        sizes: "96x96",
+        url: "/favicon.ico",
+        sizes: "any",
       },
       {
         url: "/icon.svg",
