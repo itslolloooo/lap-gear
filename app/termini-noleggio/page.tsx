@@ -8,7 +8,7 @@ import {
 } from "@/lib/rental-terms";
 
 export const metadata: Metadata = {
-  title: "Condizioni richiesta e noleggio | LAP GEAR",
+  title: "Condizioni richiesta e noleggio",
   description:
     "Condizioni applicabili alle richieste di disponibilità e ai successivi noleggi LAP GEAR.",
   alternates: {
