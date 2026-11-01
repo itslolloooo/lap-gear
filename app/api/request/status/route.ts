@@ -6,6 +6,12 @@ import {
   getServerSupabase,
 } from "@/lib/supabase-server";
 
+import {
+  getClientIp,
+  rateLimit,
+  tooManyRequestsResponse,
+} from "@/lib/rate-limit";
+
 
 export const dynamic =
   "force-dynamic";
@@ -27,6 +33,21 @@ const EMAIL_REGEX =
 export async function POST(
   request: Request
 ) {
+
+  const limited =
+    rateLimit(
+      `status:${getClientIp(request)}`,
+      10,
+      10 * 60 * 1000
+    );
+
+
+  if (!limited.ok) {
+    return tooManyRequestsResponse(
+      limited.retryAfterSeconds
+    );
+  }
+
 
   let body:
     StatusBody;
