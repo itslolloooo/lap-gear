@@ -62,6 +62,15 @@ type RequestItem = {
 
 type RequestBody = {
 
+  /*
+   * Campo trappola anti-bot: nel form è nascosto,
+   * quindi una persona lo lascia vuoto.
+   */
+
+  hp_contact_ref?:
+
+    string;
+
   customer?: {
 
     name?:
@@ -731,6 +740,69 @@ export async function POST(
       {
 
         status: 400,
+
+      }
+
+    );
+
+  }
+
+  /* =======================================================
+
+     ANTI-BOT (campo trappola)
+
+     Se è compilato, rispondiamo come se fosse andata a buon
+     fine ma non salviamo nulla e non inviamo email.
+
+     ======================================================= */
+
+  if (
+
+    typeof body?.hp_contact_ref === "string" &&
+
+    body.hp_contact_ref.trim() !== ""
+
+  ) {
+
+    return NextResponse.json(
+
+      {
+
+        ok: true,
+
+        reference:
+
+          "LAP-RICEVUTA",
+
+        statusPath:
+
+          "/richiesta",
+
+        emailStatus: {
+
+          customer:
+
+            "skipped",
+
+          admin:
+
+            "skipped",
+
+        },
+
+      },
+
+      {
+
+        status: 201,
+
+        headers: {
+
+          "Cache-Control":
+
+            "no-store, max-age=0",
+
+        },
 
       }
 
