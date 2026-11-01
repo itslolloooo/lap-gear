@@ -1668,6 +1668,12 @@ export default function RentalPage() {
 
 
 
+      hp_contact_ref:
+        String(
+          data.get(
+            "hp_contact_ref"
+          ) ?? ""
+        ),
       termsAccepted:
 
 
@@ -3857,6 +3863,22 @@ export default function RentalPage() {
 
 
             >
+              {/* Campo trappola anti-bot: invisibile per le persone */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0"
+              >
+                <label>
+                  Lascia vuoto questo campo
+                  <input
+                    type="text"
+                    name="hp_contact_ref"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    defaultValue=""
+                  />
+                </label>
+              </div>
 
 
 

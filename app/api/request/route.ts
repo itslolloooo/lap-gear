@@ -62,6 +62,15 @@ type RequestItem = {
 
 type RequestBody = {
 
+  /*
+   * Campo trappola anti-bot: nel form è nascosto,
+   * quindi una persona lo lascia vuoto.
+   */
+
+  hp_contact_ref?:
+
+    string;
+
   customer?: {
 
     name?:
@@ -731,6 +740,54 @@ export async function POST(
       {
 
         status: 400,
+
+      }
+
+    );
+
+  }
+
+  /* =======================================================
+
+     ANTI-BOT (campo trappola)
+
+     Il campo è invisibile nel form: se arriva compilato non
+     salviamo nulla e non inviamo email. Rispondiamo con un
+     errore chiaro, così una persona vera (ad esempio per via
+     del riempimento automatico del browser) se ne accorge e
+     può riprovare invece di perdere la richiesta in silenzio.
+
+     ======================================================= */
+
+  if (
+
+    typeof body?.hp_contact_ref === "string" &&
+
+    body.hp_contact_ref.trim() !== ""
+
+  ) {
+
+    return NextResponse.json(
+
+      {
+
+        error:
+
+          "Non è stato possibile inviare la richiesta. Ricarica la pagina e riprova, oppure scrivici direttamente via email.",
+
+      },
+
+      {
+
+        status: 400,
+
+        headers: {
+
+          "Cache-Control":
+
+            "no-store, max-age=0",
+
+        },
 
       }
 
