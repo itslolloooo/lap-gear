@@ -4,13 +4,13 @@ import { getBusinessInfo } from "@/lib/business-info";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Informativa sul trattamento dei dati personali raccolti da LAP GEAR per richieste, preventivi e noleggi.",
+  description: "Informativa sul trattamento dei dati personali raccolti da LAP GEAR durante la fase di lancio.",
   alternates: {
     canonical: "https://lapgear.it/privacy",
   },
 };
 
-const LAST_UPDATED = "1 novembre 2026";
+const LAST_UPDATED = "30 ottobre 2026";
 
 export default function PrivacyPage() {
   const business = getBusinessInfo();
@@ -28,8 +28,8 @@ export default function PrivacyPage() {
                 <span className="text-[#ff5a1f]">In modo trasparente.</span>
               </h1>
               <p className="mt-6 max-w-[760px] text-[16px] leading-7 text-black/50">
-                Questa informativa descrive i trattamenti svolti da LAP GEAR quando richiedi
-                un preventivo o noleggi attrezzatura attraverso questo sito.
+                Questa informativa descrive i trattamenti effettivamente svolti da LAP GEAR
+                durante la fase di lancio del sito e di raccolta delle richieste di interesse.
               </p>
             </div>
 
@@ -50,24 +50,22 @@ export default function PrivacyPage() {
           <Section number="01" title="Quali dati raccogliamo">
             <p>
               Quando invii una richiesta possiamo raccogliere nome e cognome, email, telefono,
-              date di noleggio, attrezzatura richiesta, quantità, note e contenuto delle comunicazioni.
-              Se la richiesta prosegue, trattiamo anche i dati relativi a preventivo, accettazione dei
-              termini di noleggio (con data e versione accettata), pagamenti e cauzione, ritiro e
-              restituzione dell'attrezzatura e relativi controlli. Il sito può inoltre generare log e dati
-              tecnici necessari a sicurezza, funzionamento e prevenzione degli abusi.
+              date di interesse, attrezzatura richiesta, quantità, note e contenuto delle comunicazioni.
+              Il sito può inoltre generare log e dati tecnici necessari a sicurezza, funzionamento e
+              prevenzione degli abusi.
             </p>
           </Section>
 
           <Section number="02" title="Perché li utilizziamo">
             <p>
-              Utilizziamo i dati per ricevere e gestire la tua richiesta, verificare la disponibilità
-              dell'attrezzatura, prepararti un preventivo, gestire prenotazione, pagamento, ritiro e
-              restituzione, risponderti e proteggere il sito da errori o abusi.
+              Utilizziamo i dati per ricevere e gestire la tua richiesta, risponderti, verificare in modo
+              preliminare disponibilità e interesse per il futuro servizio e proteggere il sito da errori
+              o abusi. In questa fase non utilizziamo i dati per eseguire un contratto di noleggio online.
             </p>
             <p>
-              Le basi giuridiche sono l'esecuzione di un contratto o di misure precontrattuali richieste
-              da te, gli obblighi di legge (ad esempio contabili e fiscali) e il legittimo interesse del
-              titolare a mantenere sicuri i propri sistemi e a tutelare i propri diritti.
+              Le basi giuridiche possono comprendere le misure richieste dall'interessato prima di un
+              eventuale rapporto contrattuale e il legittimo interesse del titolare a gestire le richieste
+              ricevute e mantenere sicuri i propri sistemi.
             </p>
           </Section>
 
@@ -91,9 +89,8 @@ export default function PrivacyPage() {
             <p>
               Le richieste vengono conservate per il tempo ragionevolmente necessario a gestire la
               comunicazione e valutare l'interesse per il servizio, salvo necessità di conservazione più
-              lunga per tutela di diritti, sicurezza o obblighi di legge. I documenti contabili e fiscali
-              relativi ai noleggi conclusi sono conservati per il periodo previsto dalla legge. I dati non
-              più necessari vengono eliminati o anonimizzati secondo le procedure adottate dal titolare.
+              lunga per tutela di diritti, sicurezza o obblighi di legge. I dati non più necessari vengono
+              eliminati o anonimizzati secondo le procedure adottate dal titolare.
             </p>
           </Section>
 
