@@ -751,8 +751,11 @@ export async function POST(
 
      ANTI-BOT (campo trappola)
 
-     Se è compilato, rispondiamo come se fosse andata a buon
-     fine ma non salviamo nulla e non inviamo email.
+     Il campo è invisibile nel form: se arriva compilato non
+     salviamo nulla e non inviamo email. Rispondiamo con un
+     errore chiaro, così una persona vera (ad esempio per via
+     del riempimento automatico del browser) se ne accorge e
+     può riprovare invece di perdere la richiesta in silenzio.
 
      ======================================================= */
 
@@ -768,33 +771,15 @@ export async function POST(
 
       {
 
-        ok: true,
+        error:
 
-        reference:
-
-          "LAP-RICEVUTA",
-
-        statusPath:
-
-          "/richiesta",
-
-        emailStatus: {
-
-          customer:
-
-            "skipped",
-
-          admin:
-
-            "skipped",
-
-        },
+          "Non è stato possibile inviare la richiesta. Ricarica la pagina e riprova, oppure scrivici direttamente via email.",
 
       },
 
       {
 
-        status: 201,
+        status: 400,
 
         headers: {
 
