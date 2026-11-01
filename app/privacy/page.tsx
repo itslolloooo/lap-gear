@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { getBusinessInfo } from "@/lib/business-info";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | LAP GEAR",
+  title: "Privacy Policy",
   description: "Informativa sul trattamento dei dati personali raccolti da LAP GEAR per richieste, preventivi e noleggi.",
   alternates: {
     canonical: "https://lapgear.it/privacy",

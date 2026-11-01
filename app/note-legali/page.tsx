@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getBusinessInfo } from "@/lib/business-info";
 
 export const metadata: Metadata = {
-  title: "Note legali | LAP GEAR",
+  title: "Note legali",
   description: "Informazioni legali e dati del titolare di LAP GEAR.",
   alternates: {
     canonical: "https://lapgear.it/note-legali",
