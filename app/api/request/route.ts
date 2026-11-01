@@ -16,6 +16,16 @@ import {
 
 } from "@/lib/rental-terms";
 
+import {
+
+  getClientIp,
+
+  rateLimit,
+
+  tooManyRequestsResponse,
+
+} from "@/lib/rate-limit";
+
 export const dynamic =
 
   "force-dynamic";
@@ -659,6 +669,34 @@ export async function POST(
   request: Request
 
 ) {
+
+  /* =======================================================
+
+     LIMITE RICHIESTE (anti-spam)
+
+     ======================================================= */
+
+  const limited =
+
+    rateLimit(
+
+      `request:${getClientIp(request)}`,
+
+      5,
+
+      10 * 60 * 1000
+
+    );
+
+  if (!limited.ok) {
+
+    return tooManyRequestsResponse(
+
+      limited.retryAfterSeconds
+
+    );
+
+  }
 
   /* =======================================================
 
