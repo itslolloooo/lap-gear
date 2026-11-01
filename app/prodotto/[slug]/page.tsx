@@ -98,17 +98,22 @@ export async function generateMetadata({
   const url =
     `${SITE_URL}/prodotto/${product.slug}`;
 
+  const priceText =
+    typeof product.priceDay === "number" && product.priceDay > 0
+      ? ` da ${product.priceDay.toLocaleString("it-IT", { maximumFractionDigits: 2 })} €/giorno,`
+      : "";
+
+  const intro =
+    `Richiedi ${product.name} a noleggio a Roma e Palestrina:${priceText} ritiro su appuntamento.`;
+
+  const detail =
+    (product.shortDescription || "").trim();
+
   const description =
-    (
-      product.shortDescription ||
-      product.description ||
-      `Noleggia ${product.name} a Roma con LAP GEAR. Attrezzatura professionale per produzioni video, eventi e shooting.`
-    )
-      .trim()
-      .slice(
-        0,
-        160
-      );
+    (detail && `${intro} ${detail}`.length <= 160
+      ? `${intro} ${detail}`
+      : intro
+    ).slice(0, 160);
 
   const seoTitle =
     `${product.name} a noleggio a Roma`;
