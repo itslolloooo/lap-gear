@@ -689,7 +689,7 @@ export function RequestStatusLookup({
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[18px] bg-[#181818] p-5 text-white">
                       <div className="text-[10px] font-bold uppercase tracking-[0.09em] text-[#ff7b4a]">
-                        Totale noleggio
+                        Totale noleggio (IVA esclusa)
                       </div>
 
                       <div className="mt-2 text-[34px] font-semibold tracking-[-0.05em]">
@@ -897,8 +897,8 @@ export function RequestStatusLookup({
 
                 <div className="text-[12px] text-white/35">
                   {result.quote
-                    ? "Preventivo"
-                    : "Stima noleggio"}
+                    ? "Preventivo (IVA esclusa)"
+                    : "Stima noleggio (IVA esclusa)"}
                 </div>
 
                 <div className="mt-1 text-[29px] font-semibold tracking-[-0.04em]">

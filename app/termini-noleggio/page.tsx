@@ -102,6 +102,10 @@ export default function RentalTermsPage() {
               cauzione vengono indicati prima della conferma del noleggio.
             </p>
             <p>
+              Tutti i prezzi indicati sul sito, nelle stime e nei preventivi sono
+              IVA esclusa; l&apos;IVA, se dovuta, viene aggiunta in fattura.
+            </p>
+            <p>
               Eventuali importi mostrati durante la composizione del kit sono calcolati
               sulle tariffe giornaliere del materiale selezionato e possono essere
               aggiornati nel preventivo finale.

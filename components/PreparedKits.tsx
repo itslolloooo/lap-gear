@@ -229,7 +229,7 @@ export function PreparedKits({
                             .priceDay *
                             item.quantity
                         )}
-                        /gg
+                        /gg + IVA
                       </div>
                     </div>
                   )
@@ -247,7 +247,7 @@ export function PreparedKits({
                       price
                     )}
                     <span className="ml-1 text-[12px] font-medium text-black/35">
-                      / giorno
+                      / giorno + IVA
                     </span>
                   </div>
                 </div>

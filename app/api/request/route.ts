@@ -2125,7 +2125,7 @@ export async function POST(
                     line.priceDay
                   )
                 )}
-                / giorno
+                / giorno + IVA
               </div>
             </td>
 
@@ -2243,7 +2243,7 @@ export async function POST(
               font-weight:800;
             "
           >
-            Totale stimato
+            Totale stimato (IVA esclusa)
           </td>
 
           <td

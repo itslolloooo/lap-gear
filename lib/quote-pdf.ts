@@ -1419,7 +1419,7 @@ export async function buildQuotePdf(
 
   drawLabel(
     quotePage,
-    "Totale noleggio",
+    "Totale (IVA esclusa)",
     totalBoxX +
       16,
     quoteY -
@@ -1493,7 +1493,7 @@ export async function buildQuotePdf(
     page:
       quotePage,
     text:
-      "La cauzione non e' inclusa nel totale del noleggio. Viene gestita separatamente e restituita dopo la verifica del materiale, salvo importi dovuti secondo le condizioni di noleggio.",
+      "Tutti gli importi sono IVA esclusa; l'IVA, se dovuta, e' aggiunta in fattura. La cauzione non e' inclusa nel totale del noleggio. Viene gestita separatamente e restituita dopo la verifica del materiale, salvo importi dovuti secondo le condizioni di noleggio.",
     x:
       MARGIN +
       16,
