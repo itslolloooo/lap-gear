@@ -109,7 +109,7 @@ export function ProductCard({
             </div>
 
             <div className="mt-1.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-black/38">
-              / giorno
+              / giorno + IVA
             </div>
           </div>
         </div>

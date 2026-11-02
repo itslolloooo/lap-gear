@@ -3222,7 +3222,7 @@ export default function RentalPage() {
 
 
 
-                                  / giorno
+                                  / giorno + IVA
 
 
 
@@ -4642,7 +4642,7 @@ export default function RentalPage() {
 
 
 
-                    label="Stima noleggio"
+                    label="Stima noleggio (IVA esclusa)"
 
 
 

@@ -100,7 +100,7 @@ export async function generateMetadata({
 
   const priceText =
     typeof product.priceDay === "number" && product.priceDay > 0
-      ? ` da ${product.priceDay.toLocaleString("it-IT", { maximumFractionDigits: 2 })} €/giorno,`
+      ? ` da ${product.priceDay.toLocaleString("it-IT", { maximumFractionDigits: 2 })} €/giorno + IVA,`
       : "";
 
   const intro =
@@ -308,6 +308,9 @@ export default async function ProductPage({
 
             unitText:
               "giorno",
+
+            valueAddedTaxIncluded:
+              false,
           },
         },
       },
@@ -591,7 +594,7 @@ export default async function ProductPage({
                     </div>
 
                     <div className="pb-1 text-[14px] font-medium text-white/40">
-                      / giorno
+                      / giorno + IVA
                     </div>
                   </div>
                 </div>
