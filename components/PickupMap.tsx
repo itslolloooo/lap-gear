@@ -21,7 +21,7 @@ const CONFIGURATION = {
       address1: "Via Prenestina Nuova",
       address2: "291, 00036 Palestrina RM, Italia",
       coords: { lat: 41.82444379255846, lng: 12.866355907969291 },
-      placeId: "ChIJz4au4TF_JRMRzLE3emIdX7U",
+      placeId: "ChIJuaFStu1_JRMRBPmeCDy7X3k",
     },
   ],
   mapOptions: {
