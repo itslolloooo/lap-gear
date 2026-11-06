@@ -115,6 +115,12 @@ export default function PrivacyPage() {
               La scelta viene memorizzata localmente nel browser per evitare di richiederla a ogni pagina.
               Restano possibili tecnologie strettamente necessarie al funzionamento e alla sicurezza del sito.
             </p>
+            <p>
+              Le pagine con la mappa del punto di ritiro utilizzano Google Maps. I contenuti di
+              Google vengono caricati soltanto dopo che l&apos;utente preme &quot;Mostra la mappa&quot;;
+              in quel momento Google può ricevere dati tecnici del dispositivo e impostare cookie,
+              secondo la propria informativa.
+            </p>
           </Section>
 
           <Section number="08" title="Aggiornamenti">

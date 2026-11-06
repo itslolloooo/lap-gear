@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PickupMap } from "@/components/PickupMap";
 
 type LocalFaq = {
   question: string;
@@ -200,6 +201,27 @@ export function LocalSeoPage({
               ))}
             </div>
           </article>
+        </div>
+      </section>
+
+      <section className="px-5 pb-10 sm:px-8 lg:px-10 xl:px-14">
+        <div className="mx-auto max-w-[1680px] rounded-[28px] border border-black/10 bg-white p-7 sm:p-9 lg:p-10">
+          <div className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#ff5a1f]">
+            Punto di ritiro
+          </div>
+
+          <h2 className="mt-3 text-[36px] font-semibold tracking-[-0.045em]">
+            Palestrina, su appuntamento.
+          </h2>
+
+          <p className="mt-3 max-w-[640px] text-[14px] leading-7 text-black/52">
+            Il materiale si ritira a Palestrina (RM), in Via Prenestina Nuova 291,
+            previo appuntamento.
+          </p>
+
+          <div className="mt-6">
+            <PickupMap />
+          </div>
         </div>
       </section>
 
