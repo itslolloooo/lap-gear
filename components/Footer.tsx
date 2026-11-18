@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { getBusinessInfo } from "@/lib/business-info";
 import { LOCAL_AREAS } from "@/lib/local-areas";
+import { CATEGORY_PAGES } from "@/lib/category-pages";
 
 function Footer() {
   const year = new Date().getFullYear();
@@ -78,6 +79,14 @@ function Footer() {
               {LOCAL_AREAS.map((area) => (
                 <FooterNavLink key={area.href} href={area.href}>
                   {area.label}
+                </FooterNavLink>
+              ))}
+              {CATEGORY_PAGES.map((page) => (
+                <FooterNavLink
+                  key={page.slug}
+                  href={`/noleggio-attrezzatura/${page.slug}`}
+                >
+                  Noleggio {page.label.toLowerCase()}
                 </FooterNavLink>
               ))}
             </div>

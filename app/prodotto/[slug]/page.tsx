@@ -9,6 +9,7 @@ import type {
 
 import Link from "next/link";
 import { LOCAL_AREAS } from "@/lib/local-areas";
+import { getCategoryPage } from "@/lib/category-pages";
 
 import {
   notFound,
@@ -1039,6 +1040,14 @@ export default async function ProductPage({
                 {area.label}
               </Link>
             ))}
+            {getCategoryPage(product.category) && (
+              <Link
+                href={`/noleggio-attrezzatura/${product.category}`}
+                className="rounded-full bg-[#181818] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#ff5a1f]"
+              >
+                Tutto il noleggio {product.categoryLabel.toLowerCase()}
+              </Link>
+            )}
           </div>
         </div>
       </section>

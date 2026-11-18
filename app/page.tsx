@@ -8,6 +8,7 @@ import {
 } from "@/lib/catalog-server";
 import { getBusinessInfo } from "@/lib/business-info";
 import { LOCAL_AREAS } from "@/lib/local-areas";
+import { CATEGORY_PAGES } from "@/lib/category-pages";
 
 export const dynamic = "force-dynamic";
 
@@ -268,6 +269,26 @@ export default async function HomePage() {
                   <p className="mt-2 text-[14px] leading-6 text-black/50">
                     {area.description}
                   </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-5 pb-10 sm:px-8 lg:px-10 lg:pb-12 xl:px-14">
+          <div className="mx-auto max-w-[1680px]">
+            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ff5a1f]">
+              Cosa noleggiamo
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              {CATEGORY_PAGES.map((page) => (
+                <Link
+                  key={page.slug}
+                  href={`/noleggio-attrezzatura/${page.slug}`}
+                  className="rounded-full border border-black/10 bg-white px-5 py-2.5 text-[14px] font-semibold text-black/65 transition hover:border-[#ff5a1f] hover:text-[#ff5a1f]"
+                >
+                  Noleggio {page.label.toLowerCase()}
                 </Link>
               ))}
             </div>
