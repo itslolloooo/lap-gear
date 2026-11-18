@@ -8,6 +8,7 @@ import type {
 } from "next";
 
 import Link from "next/link";
+import { LOCAL_AREAS } from "@/lib/local-areas";
 
 import {
   notFound,
@@ -1008,6 +1009,36 @@ export default async function ProductPage({
                 Il tuo kit →
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================
+          ZONE DI NOLEGGIO
+          ===================================================== */}
+
+      <section className="px-5 pb-12 sm:px-8 lg:px-10 lg:pb-16 xl:px-14">
+        <div className="mx-auto max-w-[1680px] rounded-[24px] border border-black/10 bg-white p-6 sm:p-8">
+          <h2 className="text-[24px] font-semibold tracking-[-0.04em]">
+            {product.name} a noleggio a Palestrina, Roma Est e Roma
+          </h2>
+
+          <p className="mt-3 max-w-[760px] text-[14px] leading-7 text-black/55">
+            Il materiale si ritira su appuntamento a Palestrina e puoi richiederlo
+            per lavori a Roma Est e Roma. Invia la richiesta con le date e verifichiamo
+            la disponibilità.
+          </p>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            {LOCAL_AREAS.map((area) => (
+              <Link
+                key={area.href}
+                href={area.href}
+                className="rounded-full border border-black/10 px-4 py-2 text-[13px] font-semibold text-black/65 transition hover:border-[#ff5a1f] hover:text-[#ff5a1f]"
+              >
+                {area.label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>

@@ -7,6 +7,7 @@ import {
   getCatalogProducts,
 } from "@/lib/catalog-server";
 import { getBusinessInfo } from "@/lib/business-info";
+import { LOCAL_AREAS } from "@/lib/local-areas";
 
 export const dynamic = "force-dynamic";
 
@@ -241,6 +242,34 @@ export default async function HomePage() {
                 <KitLine title="Podcast" text="Microfoni e interfaccia audio." />
                 <KitLine title="Live multicamera" text="Due camere, ottiche, regia e supporti." />
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-5 pb-10 sm:px-8 lg:px-10 lg:pb-12 xl:px-14">
+          <div className="mx-auto max-w-[1680px]">
+            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ff5a1f]">
+              Dove operiamo
+            </div>
+            <h2 className="mt-2 text-[34px] font-semibold tracking-[-0.05em] sm:text-[42px]">
+              Palestrina, Roma Est e Roma.
+            </h2>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              {LOCAL_AREAS.map((area) => (
+                <Link
+                  key={area.href}
+                  href={area.href}
+                  className="rounded-[20px] border border-black/10 bg-white p-6 transition hover:border-[#ff5a1f]"
+                >
+                  <div className="text-[19px] font-semibold tracking-[-0.03em]">
+                    {area.label} →
+                  </div>
+                  <p className="mt-2 text-[14px] leading-6 text-black/50">
+                    {area.description}
+                  </p>
+                </Link>
+              ))}
             </div>
           </div>
         </section>

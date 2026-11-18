@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getBusinessInfo } from "@/lib/business-info";
+import { LOCAL_AREAS } from "@/lib/local-areas";
 
 function Footer() {
   const year = new Date().getFullYear();
@@ -74,6 +75,11 @@ function Footer() {
               <FooterNavLink href="/richiesta">Stato richiesta</FooterNavLink>
               <FooterNavLink href="/noleggio">Il tuo kit</FooterNavLink>
               <FooterNavLink href="/termini-noleggio">Condizioni</FooterNavLink>
+              {LOCAL_AREAS.map((area) => (
+                <FooterNavLink key={area.href} href={area.href}>
+                  {area.label}
+                </FooterNavLink>
+              ))}
             </div>
 
             <div className="mt-7 border-t border-white/10 pt-6">

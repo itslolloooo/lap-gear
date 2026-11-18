@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PickupMap } from "@/components/PickupMap";
+import { LOCAL_AREAS } from "@/lib/local-areas";
 
 type LocalFaq = {
   question: string;
@@ -221,6 +222,21 @@ export function LocalSeoPage({
 
           <div className="mt-6">
             <PickupMap />
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3 text-[13px]">
+            <span className="font-semibold text-black/40">Altre zone:</span>
+            {LOCAL_AREAS.filter(
+              (area) => !canonical.endsWith(area.href)
+            ).map((area) => (
+              <Link
+                key={area.href}
+                href={area.href}
+                className="rounded-full border border-black/10 px-4 py-2 font-semibold text-black/65 transition hover:border-[#ff5a1f] hover:text-[#ff5a1f]"
+              >
+                {area.label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
