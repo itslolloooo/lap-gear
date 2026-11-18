@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import {
   getServerSupabase,
 } from "@/lib/supabase-server";
+import { CATEGORY_PAGES } from "@/lib/category-pages";
 
 export const revalidate = 3600;
 
@@ -35,6 +36,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.85,
     },
+    ...CATEGORY_PAGES.map((page) => ({
+      url: `${baseUrl}/noleggio-attrezzatura/${page.slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
     {
       url: `${baseUrl}/noleggio`,
       changeFrequency: "weekly",
