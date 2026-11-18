@@ -72,6 +72,7 @@ function Footer() {
             <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-3 text-[13px] font-semibold text-white/55 sm:grid-cols-3 lg:grid-cols-2">
               <FooterNavLink href="/catalogo">Catalogo</FooterNavLink>
               <FooterNavLink href="/kit">Kit pronti</FooterNavLink>
+              <FooterNavLink href="/guide">Guide</FooterNavLink>
               <FooterNavLink href="/#come-funziona">Come funziona</FooterNavLink>
               <FooterNavLink href="/richiesta">Stato richiesta</FooterNavLink>
               <FooterNavLink href="/noleggio">Il tuo kit</FooterNavLink>
